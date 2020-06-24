@@ -48,7 +48,7 @@ class HorizontalMovementSystem extends System {
             const position = entity.getMutableComponent(Position);
             const velocity = entity.getComponent(Velocity);
 
-            position.x -= velocity.x * delta;
+            position.x -= velocity.x;
 
             if (position.x < -width) {
                 position.x = width;
