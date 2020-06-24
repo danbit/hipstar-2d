@@ -19,19 +19,20 @@ class SpriteRendererSystem extends System {
             sprite.height
         )
 
-        // if (sprite.destinationVector2D && sprite.destinationRectangle) {
-        //     image(
-        //         sprite.image,
-        //         sprite.destinationRectangle.vector2D.x,
-        //         sprite.destinationRectangle.vector2D.y,
-        //         sprite.destinationRectangle.width,
-        //         sprite.destinationRectangle.height,
-        //         sprite.sourceRectangle.vector2D.x,
-        //         sprite.sourceRectangle.vector2D.y,
-        //         sprite.sourceRectangle.width,
-        //         sprite.sourceRectangle.height
-        //     )
-        // }
+        if (sprite.matrix) {
+            console.log(sprite)
+            image(
+                sprite.image,
+                position.x,
+                position.y,
+                sprite.width,
+                sprite.height,
+                sprite.matrix[0][0],
+                sprite.matrix[0][1],
+                sprite.imageWidth,
+                sprite.imageHeight
+            )
+        }
     }
 
 }

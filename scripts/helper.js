@@ -1,4 +1,4 @@
-  function buildSpriteSheet(x = 4, y = 4, width = 220, height = 270) {
+  function buildMatrix(x = 4, y = 4, width = 220, height = 270) {
     let arr = [];
     let positionX = 0;
     let positionY = 0;
