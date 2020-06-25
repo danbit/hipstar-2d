@@ -1,17 +1,14 @@
 let imageBackground;
+let enemyImage;
 let characterImage;
-let background;
-let backgroundParallax;
-let character;
 let soundtrack;
 let world;
 let lastTime;
 
-const BACKGROUND_SPEED = 3;
-
 function preload() {
   characterImage = loadImage('assets/sprites/character/correndo.png');
   imageBackground = loadImage('assets/sprites/background/floresta.png');
+  enemyImage = loadImage('assets/sprites/enemies/gotinha.png');
   soundtrack = loadSound('assets/sounds/trilha_jogo.mp3');
 }
 
@@ -25,41 +22,25 @@ function setup() {
     .registerComponent(Position)
     .registerComponent(Sprite)
     .registerComponent(Velocity)
+    .registerComponent(Animable)
     .registerComponent(Renderable)
     .registerComponent(Background)
+    .registerComponent(Player)
+    .registerComponent(PlayerInput)
+    .registerComponent(PlayerPhysics)
     .registerSystem(SpriteRendererSystem)
-    .registerSystem(HorizontalMovementSystem);
+    .registerSystem(HorizontalMovementSystem)
+    .registerSystem(AnimationSystem)
+    .registerSystem(PlayerMovementSystem)
 
-  background = world.createEntity()
-    .addComponent(Background)
-    .addComponent(Renderable)
-    .addComponent(Position, { x: 0, y: 0 })
-    .addComponent(Velocity, { x: BACKGROUND_SPEED, y: 0 })
-    .addComponent(Sprite, { image: imageBackground, width, height })
-
-  backgroundParallax = world.createEntity()
-    .addComponent(Background)
-    .addComponent(Renderable)
-    .addComponent(Position, { x: width, y: 0 })
-    .addComponent(Velocity, { x: BACKGROUND_SPEED, y: 0 })
-    .addComponent(Sprite, { image: imageBackground, width, height })
-
-  const characterMatrix = buildMatrix(4, 4, 220, 270);
-  character = world.createEntity()
-    .addComponent(Player)
-    .addComponent(Renderable)
-    .addComponent(Position, { x: 0, y: height - 110 })
-    .addComponent(Sprite, {
-      image: characterImage,
-      width: 220,
-      height: 110,
-      imageWidth: 110,
-      imageHeight: 135,
-      matrix: characterMatrix
-    })
+  createAllEntities(world);
 
   frameRate(30);
   //soundtrack.loop();
+}
+
+function keyPressed() {
+  playerEntity.addComponent(PlayerInput, { key })
 }
 
 function draw() {
