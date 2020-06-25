@@ -7,15 +7,15 @@ const createAllEntities = (world) => {
         .addComponent(Background)
         .addComponent(Renderable)
         .addComponent(Position, { x: 0, y: 0 })
-        // .addComponent(Velocity, { x: backgroundSpeed, y: 0 })
+        .addComponent(Velocity, { x: backgroundSpeed, y: 0 })
         .addComponent(Sprite, { image: imageBackground, width, height })
 
-    // world.createEntity()
-    //     .addComponent(Background)
-    //     .addComponent(Renderable)
-    //     .addComponent(Position, { x: width, y: 0 })
-    //     .addComponent(Velocity, { x: backgroundSpeed, y: 0 })
-    //     .addComponent(Sprite, { image: imageBackground, width, height })
+    world.createEntity()
+        .addComponent(Background)
+        .addComponent(Renderable)
+        .addComponent(Position, { x: width, y: 0 })
+        .addComponent(Velocity, { x: backgroundSpeed, y: 0 })
+        .addComponent(Sprite, { image: imageBackground, width, height })
 
     const characterMatrix = buildMatrix(4, 4, 220, 270)
     const jumpVariation = 40
