@@ -7,15 +7,15 @@ const createAllEntities = (world) => {
         .addComponent(Background)
         .addComponent(Renderable)
         .addComponent(Position, { x: 0, y: 0 })
-        // .addComponent(Velocity, { x: backgroundSpeed, y: 0 })
+        .addComponent(Velocity, { x: backgroundSpeed, y: 0 })
         .addComponent(Sprite, { image: imageBackground, width, height })
 
-    // world.createEntity()
-    //     .addComponent(Background)
-    //     .addComponent(Renderable)
-    //     .addComponent(Position, { x: width, y: 0 })
-    //     .addComponent(Velocity, { x: backgroundSpeed, y: 0 })
-    //     .addComponent(Sprite, { image: imageBackground, width, height })
+    world.createEntity()
+        .addComponent(Background)
+        .addComponent(Renderable)
+        .addComponent(Position, { x: width, y: 0 })
+        .addComponent(Velocity, { x: backgroundSpeed, y: 0 })
+        .addComponent(Sprite, { image: imageBackground, width, height })
 
     const characterMatrix = buildMatrix(4, 4, 220, 270)
     const jumpVariation = 40
@@ -25,6 +25,7 @@ const createAllEntities = (world) => {
         .addComponent(Player)
         .addComponent(Renderable)
         .addComponent(Animable)
+        .addComponent(Position, { x: 0, y: initialPositionY })
         .addComponent(PlayerPhysics, { 
             initialPositionY, 
             jumpSpeed: 0, 
@@ -32,7 +33,6 @@ const createAllEntities = (world) => {
             jumpVariation, 
             gravity: 3 
         })
-        .addComponent(Position, { x: 0, y: initialPositionY })
         .addComponent(Sprite, {
             image: characterImage,
             width: 110,
@@ -40,7 +40,8 @@ const createAllEntities = (world) => {
             imageWidth: 220,
             imageHeight: 270,
             matrix: characterMatrix,
-            frame: 0
+            frame: 0,
+            collisionOffset: 0.7
         })
 
     const slimeMatrix = buildMatrix(7, 4, 104, 104)
@@ -58,6 +59,7 @@ const createAllEntities = (world) => {
             imageWidth: 104,
             imageHeight: 104,
             matrix: slimeMatrix,
-            frame: 0
+            frame: 0,
+            collisionOffset: 0.7
         })
 }

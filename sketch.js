@@ -2,14 +2,17 @@ let imageBackground;
 let enemyImage;
 let characterImage;
 let soundtrack;
+let jumpSound;
 let world;
 let lastTime;
+let isGameOver;
 
 function preload() {
   characterImage = loadImage('assets/sprites/character/correndo.png');
   imageBackground = loadImage('assets/sprites/background/floresta.png');
   enemyImage = loadImage('assets/sprites/enemies/gotinha.png');
   soundtrack = loadSound('assets/sounds/trilha_jogo.mp3');
+  jumpSound = loadSound('assets/sounds/somPulo.mp3');
 }
 
 function setup() {
@@ -37,11 +40,14 @@ function setup() {
   createAllEntities(world);
 
   frameRate(30);
-  //soundtrack.loop();
+  soundtrack.loop();
 }
 
 function keyPressed() {
-  playerEntity.addComponent(PlayerInput, { key })
+  if(isGameOver){
+    window.location.reload();
+  }
+  world.createEntity().addComponent(PlayerInput, { key })
 }
 
 function draw() {

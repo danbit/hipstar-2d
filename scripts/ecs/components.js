@@ -18,13 +18,8 @@ Sprite.schema = {
   matrix: { type: Types.Array },
   width: { type: Types.Number },
   height: { type: Types.Number },
-  frame: { type: Types.Number }
-}
-
-class Movement extends Component { }
-Movement.schema = {
-  velocity: { type: Types.Vector2DType },
-  acceleration: { type: Types.Vector2DType }
+  frame: { type: Types.Number },
+  collisionOffset: { type: Types.Number },
 }
 
 class Velocity extends Component { }
