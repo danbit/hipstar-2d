@@ -2,6 +2,7 @@ let imageBackground;
 let enemyImage;
 let characterImage;
 let soundtrack;
+let jumpSound;
 let world;
 let lastTime;
 
@@ -10,6 +11,7 @@ function preload() {
   imageBackground = loadImage('assets/sprites/background/floresta.png');
   enemyImage = loadImage('assets/sprites/enemies/gotinha.png');
   soundtrack = loadSound('assets/sounds/trilha_jogo.mp3');
+  jumpSound = loadSound('assets/sounds/somPulo.mp3');
 }
 
 function setup() {
@@ -41,7 +43,7 @@ function setup() {
 }
 
 function keyPressed() {
-  playerEntity.addComponent(PlayerInput, { key })
+  world.createEntity().addComponent(PlayerInput, { key })
 }
 
 function draw() {

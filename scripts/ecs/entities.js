@@ -25,6 +25,7 @@ const createAllEntities = (world) => {
         .addComponent(Player)
         .addComponent(Renderable)
         .addComponent(Animable)
+        .addComponent(Position, { x: 0, y: initialPositionY })
         .addComponent(PlayerPhysics, { 
             initialPositionY, 
             jumpSpeed: 0, 
@@ -32,7 +33,6 @@ const createAllEntities = (world) => {
             jumpVariation, 
             gravity: 3 
         })
-        .addComponent(Position, { x: 0, y: initialPositionY })
         .addComponent(Sprite, {
             image: characterImage,
             width: 110,

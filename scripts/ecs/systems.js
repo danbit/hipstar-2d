@@ -11,6 +11,10 @@ class SpriteRendererSystem extends System {
     }
 
     render(sprite, position) {
+        if(window.enableRenderCollider){
+            noFill()
+            rect(position.x, position.y, sprite.width, sprite.height)
+        }
         if (sprite.matrix) {
             image(
                 sprite.image,
@@ -61,34 +65,34 @@ class PlayerMovementSystem extends System {
     execute(_delta, _time) {
         let hasVerticalInput = false;
 
-        // this.queries.inputs.results.forEach(entity => {
-        //     const input = entity.getComponent(PlayerInput);
+        this.queries.inputs.results.forEach(entity => {
+            const input = entity.getComponent(PlayerInput);
 
-        //     if (input.key === 'ArrowUp') {
-        //         hasVerticalInput = true
-        //     }
-        //     entity.removeComponent(PlayerInput, true)
-        // })
+            if (input.key === 'ArrowUp') {
+                hasVerticalInput = true
+            }
+            entity.removeComponent(PlayerInput, true)
+        })
 
         const playerEntity = this.queries.player.results[0]
         if (!playerEntity) return
 
-        const input = playerEntity.getComponent(PlayerInput);
-        hasVerticalInput = input.key === 'ArrowUp'
-
+        const position = playerEntity.getMutableComponent(Position);
+        const physics = playerEntity.getMutableComponent(PlayerPhysics);
+        
         if (hasVerticalInput) {
-            const position = playerEntity.getMutableComponent(Position);
-            const physics = playerEntity.getMutableComponent(PlayerPhysics);
-
             this.jump(physics)
-            this.appliesGravity(position, physics, playerEntity)
         }
+
+        this.appliesGravity(position, physics, playerEntity)
+        playerEntity.removeComponent(PlayerInput, true)
     }
 
     jump(physics) {
         if (physics.jumpAmount > 0) {
+            jumpSound.play()
             physics.jumpSpeed = - 31
-            physics.jumpAmount--;
+            physics.jumpAmount--
         }
     }
 
@@ -98,13 +102,12 @@ class PlayerMovementSystem extends System {
 
         if (position.y > physics.initialPositionY) {
             position.y = physics.initialPositionY;
-            physics.jumpAmount = 2;
-            playerEntity.removeComponent(PlayerInput, true)
+            physics.jumpAmount = 2;            
         }
     }
 }
 PlayerMovementSystem.queries = {
-    player: { components: [Player, Position, PlayerPhysics, PlayerInput] },
+    player: { components: [Player, Position, PlayerPhysics] },
     inputs: { components: [PlayerInput] },
 }
 
