@@ -40,7 +40,8 @@ const createAllEntities = (world) => {
             imageWidth: 220,
             imageHeight: 270,
             matrix: characterMatrix,
-            frame: 0
+            frame: 0,
+            collisionOffset: 0.7
         })
 
     const slimeMatrix = buildMatrix(7, 4, 104, 104)
@@ -58,6 +59,7 @@ const createAllEntities = (world) => {
             imageWidth: 104,
             imageHeight: 104,
             matrix: slimeMatrix,
-            frame: 0
+            frame: 0,
+            collisionOffset: 0.7
         })
 }

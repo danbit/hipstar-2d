@@ -11,7 +11,7 @@ class SpriteRendererSystem extends System {
     }
 
     render(sprite, position) {
-        if(window.enableRenderCollider){
+        if (window.enableRenderCollider) {
             noFill()
             rect(position.x, position.y, sprite.width, sprite.height)
         }
@@ -79,7 +79,7 @@ class PlayerMovementSystem extends System {
 
         const position = playerEntity.getMutableComponent(Position);
         const physics = playerEntity.getMutableComponent(PlayerPhysics);
-        
+
         if (hasVerticalInput) {
             this.jump(physics)
         }
@@ -102,7 +102,7 @@ class PlayerMovementSystem extends System {
 
         if (position.y > physics.initialPositionY) {
             position.y = physics.initialPositionY;
-            physics.jumpAmount = 2;            
+            physics.jumpAmount = 2;
         }
     }
 }
@@ -129,13 +129,24 @@ AnimationSystem.queries = {
 
 class CollisionSystem extends System {
     execute(_delta, _time) {
-        const playerEntity = this.queries.player.results[0]
+        const player = this.queries.player.results[0]
 
         this.queries.enimies.results.forEach(enemy => {
-            if(this.isColliding(playerEntity, enemy)){
-                console.log('colidiu')
+            if (this.isColliding(player, enemy)) {                
+                this.gameOver()
             }
         });
+    }
+
+    gameOver() {
+        background('rgba(0%,0%,0%,.80)');
+        fill("#cc0000");
+        soundtrack.stop()
+        textAlign(CENTER)
+        textSize(48);
+        text("Game Over", width / 2, height / 2)
+        isGameOver = true;
+        noLoop()
     }
 
     isColliding(player, enemy) {
@@ -147,12 +158,12 @@ class CollisionSystem extends System {
         const colliding = collideRectRect(
             playerPosition.x,
             playerPosition.y,
-            playerSprite.width,
-            playerSprite.height,
+            playerSprite.width * playerSprite.collisionOffset,
+            playerSprite.height * playerSprite.collisionOffset,
             enamyPosition.x,
             enamyPosition.y,
-            enemySprite.width,
-            enemySprite.height,
+            enemySprite.width * enemySprite.collisionOffset,
+            enemySprite.height * enemySprite.collisionOffset,
         );
         return colliding;
     }
@@ -160,4 +171,20 @@ class CollisionSystem extends System {
 CollisionSystem.queries = {
     player: { components: [Player, Position, Sprite] },
     enimies: { components: [Enemy, Position, Sprite] },
+}
+
+class GameSystem extends System {
+    execute(_delta, _time) {
+        this.queries.entities.results.forEach(entity => {
+            const sprite = entity.getMutableComponent(Sprite);
+
+            sprite.frame++;
+            if (sprite.frame >= sprite.matrix.length - 1) {
+                sprite.frame = 0;
+            }
+        });
+    }
+}
+GameSystem.queries = {
+    entities: { components: [Position, Animable] },
 }

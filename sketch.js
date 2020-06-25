@@ -5,6 +5,7 @@ let soundtrack;
 let jumpSound;
 let world;
 let lastTime;
+let isGameOver;
 
 function preload() {
   characterImage = loadImage('assets/sprites/character/correndo.png');
@@ -39,10 +40,13 @@ function setup() {
   createAllEntities(world);
 
   frameRate(30);
-  //soundtrack.loop();
+  soundtrack.loop();
 }
 
 function keyPressed() {
+  if(isGameOver){
+    window.location.reload();
+  }
   world.createEntity().addComponent(PlayerInput, { key })
 }
 
