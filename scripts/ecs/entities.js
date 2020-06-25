@@ -19,7 +19,7 @@ const createAllEntities = (world) => {
 
     const characterMatrix = buildMatrix(4, 4, 220, 270)
     const jumpVariation = 40
-    const initialPositionY = height - 135 - jumpVariation
+    const initialPositionY = height - 135
 
     playerEntity = world.createEntity()
         .addComponent(Player)

@@ -32,6 +32,7 @@ function setup() {
     .registerSystem(HorizontalMovementSystem)
     .registerSystem(AnimationSystem)
     .registerSystem(PlayerMovementSystem)
+    .registerSystem(CollisionSystem)
 
   createAllEntities(world);
 
