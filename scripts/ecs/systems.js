@@ -90,7 +90,7 @@ class PlayerMovementSystem extends System {
 
     jump(physics) {
         if (physics.jumpAmount > 0) {
-            jumpSound.play()
+            game.jumpSound.play()
             physics.jumpSpeed = - 31
             physics.jumpAmount--
         }
@@ -107,13 +107,13 @@ class PlayerMovementSystem extends System {
     }
 }
 PlayerMovementSystem.queries = {
-    player: { components: [Player, Position, PlayerPhysics] },
+    player: { components: [PlayerTag, Position, PlayerPhysics] },
     inputs: { components: [PlayerInput] },
 }
 
 class AnimationSystem extends System {
     execute(_delta, _time) {
-        this.queries.entities.results.forEach(entity => {
+        this.queries.enemies.results.forEach(entity => {
             const sprite = entity.getMutableComponent(Sprite);
 
             sprite.frame++;
@@ -121,16 +121,22 @@ class AnimationSystem extends System {
                 sprite.frame = 0;
             }
         });
+
+        const playerEntity = this.queries.player.results[0]
+        const sprite = entity.getMutableComponent(Sprite);
     }
 }
 AnimationSystem.queries = {
-    entities: { components: [Position, Animable] },
+    player: { components: [PlayerTag, Animable] },
+    enemies: { components: [EnemyTag, Animable] },
 }
 
 class CollisionSystem extends System {
     execute(_delta, _time) {
+        if(window.disableAllCollisions){
+            return;
+        }
         const player = this.queries.player.results[0]
-
         this.queries.enimies.results.forEach(enemy => {
             if (this.isColliding(player, enemy)) {                
                 this.gameOver()
@@ -141,7 +147,7 @@ class CollisionSystem extends System {
     gameOver() {
         background('rgba(0%,0%,0%,.80)');
         fill("#cc0000");
-        soundtrack.stop()
+        game.soundtrack.stop()
         textAlign(CENTER)
         textSize(48);
         text("Game Over", width / 2, height / 2)
@@ -169,8 +175,8 @@ class CollisionSystem extends System {
     }
 }
 CollisionSystem.queries = {
-    player: { components: [Player, Position, Sprite] },
-    enimies: { components: [Enemy, Position, Sprite] },
+    player: { components: [PlayerTag, Position, Sprite] },
+    enimies: { components: [EnemyTag, Position, Sprite] },
 }
 
 class GameSystem extends System {

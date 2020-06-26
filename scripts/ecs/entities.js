@@ -1,22 +1,5 @@
-let playerEntity;
-
-const createAllEntities = (world) => {
-    const backgroundSpeed = 3;
-
-    world.createEntity()
-        .addComponent(Background)
-        .addComponent(Renderable)
-        .addComponent(Position, { x: 0, y: 0 })
-        .addComponent(Velocity, { x: backgroundSpeed, y: 0 })
-        .addComponent(Sprite, { image: imageBackground, width, height })
-
-    world.createEntity()
-        .addComponent(Background)
-        .addComponent(Renderable)
-        .addComponent(Position, { x: width, y: 0 })
-        .addComponent(Velocity, { x: backgroundSpeed, y: 0 })
-        .addComponent(Sprite, { image: imageBackground, width, height })
-
+const createAllEntities = (game) => {
+    const world = game.world;
     const characterMatrix = buildMatrix(4, 4, 220, 270)
     const jumpVariation = 40
     const initialPositionY = height - 135
@@ -34,7 +17,7 @@ const createAllEntities = (world) => {
             gravity: 3 
         })
         .addComponent(Sprite, {
-            image: characterImage,
+            image: game.characterImage,
             width: 110,
             height: 135,
             imageWidth: 220,
@@ -53,7 +36,7 @@ const createAllEntities = (world) => {
         .addComponent(Position, { x: width - 52, y: height - 52 })
         .addComponent(Velocity, { x: slimeSpeed, y: 0 })
         .addComponent(Sprite, {
-            image: enemyImage,
+            image: game.enemyImage,
             width: 52,
             height: 52,
             imageWidth: 104,

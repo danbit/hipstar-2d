@@ -1,8 +1,8 @@
 class Renderable extends TagComponent { }
 class Collidable extends TagComponent {}
-class Background extends TagComponent { }
-class Player extends TagComponent { }
-class Enemy extends TagComponent { }
+class BackgroundTag extends TagComponent { }
+class PlayerTag extends TagComponent { }
+class EnemyTag extends TagComponent { }
 
 class Position extends Component { }
 Position.schema = {
@@ -46,3 +46,10 @@ PlayerPhysics.schema = {
   jumpVariation: { type: Types.Number },
   gravity: { type: Types.Number },
 }
+
+class PlayerAnimation extends Component { }
+Position.schema = {
+  running: { type: Types.Boolean },
+  idle: { type: Types.String },
+  jump: { type: Types.String }
+};
