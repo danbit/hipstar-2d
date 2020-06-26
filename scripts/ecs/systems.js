@@ -5,25 +5,24 @@ class SpriteRendererSystem extends System {
         this.queries.renderables.results.forEach(entity => {
             const sprite = entity.getComponent(Sprite);
             const position = entity.getComponent(Position);
+            const animation = entity.getComponent(Animation);
 
-            this.render(sprite, position);
+            this.render(sprite, position, animation);
         });
     }
 
-    render(sprite, position) {
-        if (window.enableRenderCollider) {
-            noFill()
-            rect(position.x, position.y, sprite.width, sprite.height)
-        }
-        if (sprite.matrix) {
+    render(sprite, position, animation) {
+        if (sprite.isSpriteSheet) {
+            const currentAnimation = animation.animations[animation.current]
+            console.log('animation.current', animation.current)
             image(
                 sprite.image,
                 position.x,
                 position.y,
                 sprite.width,
                 sprite.height,
-                sprite.matrix[sprite.frame][0],
-                sprite.matrix[sprite.frame][1],
+                sprite.frame * sprite.width,
+                currentAnimation.row * sprite.height,
                 sprite.imageWidth,
                 sprite.imageHeight
             )
@@ -35,6 +34,10 @@ class SpriteRendererSystem extends System {
                 sprite.width,
                 sprite.height
             )
+        }
+        if (window.enableRenderCollider) {
+            noFill()
+            rect(position.x, position.y, sprite.width, sprite.height)
         }
     }
 }
@@ -77,32 +80,35 @@ class PlayerMovementSystem extends System {
         const playerEntity = this.queries.player.results[0]
         if (!playerEntity) return
 
-        const position = playerEntity.getMutableComponent(Position);
-        const physics = playerEntity.getMutableComponent(PlayerPhysics);
+        this.position = playerEntity.getMutableComponent(Position);
+        this.physics = playerEntity.getMutableComponent(PlayerPhysics);
+        this.animation = playerEntity.getMutableComponent(Animation);
 
         if (hasVerticalInput) {
-            this.jump(physics)
+            this.jump()
         }
 
-        this.appliesGravity(position, physics, playerEntity)
+        this.appliesGravity()
         playerEntity.removeComponent(PlayerInput, true)
     }
 
-    jump(physics) {
-        if (physics.jumpAmount > 0) {
+    jump() {
+        if (this.physics.jumpAmount > 0) {
             game.jumpSound.play()
-            physics.jumpSpeed = - 31
-            physics.jumpAmount--
+            this.animation.current = 'jumpingUp'
+            this.physics.jumpSpeed = - this.physics.maxJumpHeight
+            this.physics.jumpAmount--
         }
     }
 
-    appliesGravity(position, physics) {
-        position.y += physics.jumpSpeed;
-        physics.jumpSpeed += physics.gravity;
-
-        if (position.y > physics.initialPositionY) {
-            position.y = physics.initialPositionY;
-            physics.jumpAmount = 2;
+    appliesGravity() {
+        this.position.y += this.physics.jumpSpeed;
+        this.physics.jumpSpeed += this.physics.gravity;
+        
+        if (this.position.y > this.physics.initialPositionY) {            
+            this.position.y = this.physics.initialPositionY;
+            this.physics.jumpAmount = 2;
+            this.physics.jumpSpeed = 0
         }
     }
 }
@@ -113,32 +119,32 @@ PlayerMovementSystem.queries = {
 
 class AnimationSystem extends System {
     execute(_delta, _time) {
-        this.queries.enemies.results.forEach(entity => {
+        this.queries.entities.results.forEach(entity => {
             const sprite = entity.getMutableComponent(Sprite);
+            const animation = entity.getMutableComponent(Animation);
+            const currentAnimation = animation.animations[animation.current]
 
             sprite.frame++;
-            if (sprite.frame >= sprite.matrix.length - 1) {
+            if (sprite.frame >= currentAnimation.totalFrames) {
                 sprite.frame = 0;
+                animation.current = 'running'
+                console.log('running')
             }
         });
-
-        const playerEntity = this.queries.player.results[0]
-        const sprite = entity.getMutableComponent(Sprite);
     }
 }
 AnimationSystem.queries = {
-    player: { components: [PlayerTag, Animable] },
-    enemies: { components: [EnemyTag, Animable] },
+    entities: { components: [Animable] },
 }
 
 class CollisionSystem extends System {
     execute(_delta, _time) {
-        if(window.disableAllCollisions){
+        if (window.disableAllCollisions) {
             return;
         }
         const player = this.queries.player.results[0]
         this.queries.enimies.results.forEach(enemy => {
-            if (this.isColliding(player, enemy)) {                
+            if (this.isColliding(player, enemy)) {
                 this.gameOver()
             }
         });
@@ -177,20 +183,4 @@ class CollisionSystem extends System {
 CollisionSystem.queries = {
     player: { components: [PlayerTag, Position, Sprite] },
     enimies: { components: [EnemyTag, Position, Sprite] },
-}
-
-class GameSystem extends System {
-    execute(_delta, _time) {
-        this.queries.entities.results.forEach(entity => {
-            const sprite = entity.getMutableComponent(Sprite);
-
-            sprite.frame++;
-            if (sprite.frame >= sprite.matrix.length - 1) {
-                sprite.frame = 0;
-            }
-        });
-    }
-}
-GameSystem.queries = {
-    entities: { components: [Position, Animable] },
 }

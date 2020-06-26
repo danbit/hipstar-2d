@@ -8,7 +8,7 @@ function preload() {
 }
 
 function setup() {
-  createCanvas(640, 360)
+  createCanvas(480, 270)
   frameRate(30)
   game.onStart()
 }
