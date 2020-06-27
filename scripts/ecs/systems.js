@@ -3,12 +3,18 @@ class SpriteRendererSystem extends System {
     execute(_delta, _time) {
         // Iterate through all the entities on the query
         this.queries.renderables.results.forEach(entity => {
-            const sprite = entity.getComponent(Sprite);
-            const position = entity.getComponent(Position);
-            const animation = entity.getComponent(Animation);
+            const sprite = entity.getComponent(Sprite)
+            const position = entity.getComponent(Position)
+            const animation = entity.getComponent(Animation)
 
-            this.render(sprite, position, animation);
-        });
+            const enemy = entity.getComponent(EnemyTag)
+            if (enemy) {
+                // console.log('enemy sprite', animation)
+
+            }
+
+            this.render(sprite, position, animation)
+        })
     }
 
     render(sprite, position, animation) {
@@ -48,27 +54,58 @@ SpriteRendererSystem.queries = {
 class HorizontalMovementSystem extends System {
     execute(_delta, _time) {
         this.queries.entities.results.forEach(entity => {
-            const position = entity.getMutableComponent(Position);
-            const velocity = entity.getComponent(Velocity);
+            const position = entity.getMutableComponent(Position)
+            const velocity = entity.getComponent(Velocity)
 
-            position.x -= velocity.x;
+            position.x -= velocity.x
 
             if (position.x < -width) {
-                position.x = width;
+                position.x = width
             }
-        });
+        })
+
+        let nextBackgroundIndex = 1
+        const backgrounds = this.queries.backgrounds.results
+
+        for (let i = 0; i < backgrounds.length; i++) {
+            const backgroundEntity = backgrounds[i]
+            const position = backgroundEntity.getMutableComponent(Position)
+            const velocity = backgroundEntity.getComponent(Velocity)
+
+            position.x -= velocity.x
+
+            if (position.x <= -width) {
+                position.x = width
+            }
+
+            // const nextBackgroundEntity = backgrounds[nextBackgroundIndex]
+            // const nextBackgroundPosition = nextBackgroundEntity.getMutableComponent(Position)
+
+
+            // if (nextBackgroundPosition.x <= -width) {
+            //     nextBackgroundPosition.x = width + position.x
+            // }
+
+            // console.log('nextBackground', nextBackgroundIndex)
+
+            // nextBackgroundIndex++
+            // if (nextBackgroundIndex >= backgrounds.length) {
+            //     nextBackgroundIndex = 0
+            // }
+        }
     }
 }
 HorizontalMovementSystem.queries = {
-    entities: { components: [Position, Velocity] },
+    entities: { components: [Not(BackgroundTag), Position, Velocity] },
+    backgrounds: { components: [BackgroundTag, Position, Velocity] },
 }
 
 class PlayerMovementSystem extends System {
     execute(_delta, _time) {
-        let hasVerticalInput = false;
+        let hasVerticalInput = false
 
         this.queries.inputs.results.forEach(entity => {
-            const input = entity.getComponent(PlayerInput);
+            const input = entity.getComponent(PlayerInput)
 
             if (input.key === 'ArrowUp') {
                 hasVerticalInput = true
@@ -79,10 +116,10 @@ class PlayerMovementSystem extends System {
         const playerEntity = this.queries.player.results[0]
         if (!playerEntity) return
 
-        this.position = playerEntity.getMutableComponent(Position);
-        this.physics = playerEntity.getMutableComponent(PlayerPhysics);
-        this.animation = playerEntity.getMutableComponent(Animation);
-        this.sprite = playerEntity.getMutableComponent(Sprite);
+        this.position = playerEntity.getMutableComponent(Position)
+        this.physics = playerEntity.getMutableComponent(PlayerPhysics)
+        this.animation = playerEntity.getMutableComponent(Animation)
+        this.sprite = playerEntity.getMutableComponent(Sprite)
 
         if (hasVerticalInput) {
             this.jump()
@@ -104,12 +141,12 @@ class PlayerMovementSystem extends System {
     }
 
     appliesGravity() {
-        this.position.y += this.physics.jumpSpeed;
-        this.physics.jumpSpeed += this.physics.gravity;
+        this.position.y += this.physics.jumpSpeed
+        this.physics.jumpSpeed += this.physics.gravity
 
         if (this.position.y > this.physics.initialPositionY) {
-            this.position.y = this.physics.initialPositionY;
-            this.physics.jumpAmount = 2;
+            this.position.y = this.physics.initialPositionY
+            this.physics.jumpAmount = 2
             this.physics.jumpSpeed = 0
         }
 
@@ -117,19 +154,15 @@ class PlayerMovementSystem extends System {
         const onGround = this.position.y === this.physics.initialPositionY
         const jumpingUp = this.animation.current === 'jumpingUp'
 
-        if (onGround) {
-            if (!jumpingUp) {
-                this.animation.current = 'running'
-                this.physics.onGround = true
-            }
-        } else {            
+        if (onGround && !jumpingUp) {
+            this.animation.current = 'running'
+            this.physics.onGround = true
+        } else {
             if (this.position.y == this.physics.maxJumpHeight) {
                 this.animation.current = 'jumpingDown'
-                console.log('*********************jumping DOWN*********************')
             }
             else if (this.position.y < this.physics.maxJumpHeight) {
                 this.animation.current = 'doubleJumping'
-                console.log('*********************Double jump*********************')
             }
             this.physics.onGround = false
         }
@@ -143,15 +176,15 @@ PlayerMovementSystem.queries = {
 class AnimationSystem extends System {
     execute(_delta, _time) {
         this.queries.entities.results.forEach(entity => {
-            const sprite = entity.getMutableComponent(Sprite);
-            const animation = entity.getMutableComponent(Animation);
+            const sprite = entity.getMutableComponent(Sprite)
+            const animation = entity.getMutableComponent(Animation)
             const currentAnimation = animation.animations[animation.current]
 
-            sprite.frame++;
+            sprite.frame++
             if (sprite.frame >= currentAnimation.totalFrames) {
-                sprite.frame = 0;
+                sprite.frame = 0
             }
-        });
+        })
     }
 }
 AnimationSystem.queries = {
@@ -161,32 +194,32 @@ AnimationSystem.queries = {
 class CollisionSystem extends System {
     execute(_delta, _time) {
         if (window.disableAllCollisions) {
-            return;
+            return
         }
         const player = this.queries.player.results[0]
         this.queries.enimies.results.forEach(enemy => {
             if (this.isColliding(player, enemy)) {
                 this.gameOver()
             }
-        });
+        })
     }
 
     gameOver() {
-        background('rgba(0%,0%,0%,.80)');
-        fill("#cc0000");
+        background('rgba(0%,0%,0%,.80)')
+        fill("#cc0000")
         game.soundtrack.stop()
         textAlign(CENTER)
-        textSize(48);
+        textSize(48)
         text("Game Over", width / 2, height / 2)
-        isGameOver = true;
+        isGameOver = true
         noLoop()
     }
 
     isColliding(player, enemy) {
-        const playerSprite = player.getComponent(Sprite);
-        const playerPosition = player.getComponent(Position);
-        const enemySprite = enemy.getComponent(Sprite);
-        const enamyPosition = enemy.getComponent(Position);
+        const playerSprite = player.getComponent(Sprite)
+        const playerPosition = player.getComponent(Position)
+        const enemySprite = enemy.getComponent(Sprite)
+        const enamyPosition = enemy.getComponent(Position)
 
         const colliding = collideRectRect(
             playerPosition.x,
@@ -197,8 +230,8 @@ class CollisionSystem extends System {
             enamyPosition.y,
             enemySprite.width * enemySprite.collisionOffset,
             enemySprite.height * enemySprite.collisionOffset,
-        );
-        return colliding;
+        )
+        return colliding
     }
 }
 CollisionSystem.queries = {

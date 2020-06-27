@@ -1,22 +1,26 @@
-const game = new Game()  
+const game = new Game()
 window.disableAllCollisions = true
 
 let isGameOver
 
-function preload() {
+preload = () => {
   game.onCreate()
 }
 
-function setup() {
+setup = () => {
   createCanvas(640, 360)
   frameRate(30)
   game.onStart()
 }
 
-function keyPressed() {
+keyPressed = () => {
   game.onInput('keyPressed', key)
 }
 
-function draw() {
+draw = () => {
   game.onUpdate()
+}
+
+windowResized = () => {
+  resizeCanvas(window.innerWidth, window.innerHeight)
 }

@@ -1,7 +1,17 @@
+/* style.css */
+
 html, body {
-  margin: 0;
-  padding: 0;
+  height: 100%;
 }
-canvas {
-  display: block;
+
+body {
+  margin: 0;
+  display: flex;
+
+  /* This centers our sketch horizontally. */
+  justify-content: center;
+
+  /* This centers our sketch vertically. */
+  align-items: center;
+  background-color: black;
 }
