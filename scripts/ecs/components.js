@@ -42,6 +42,7 @@ PlayerPhysics.schema = {
   jumpVariation: { type: Types.Number },
   maxJumpHeight: { type: Types.Number },
   gravity: { type: Types.Number },
+  onGround: { type: Types.Boolean }, 
 }
 
 class Animation extends Component { }

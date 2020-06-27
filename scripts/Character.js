@@ -1,13 +1,13 @@
 class Character {
     constructor(characterImage, world) {
         this.characterImage = characterImage
+        this.scale = 1.5;
         this.createEntities(world)
     }
 
     createEntities(world) {
-        const jumpVariation = 40
         const initialPositionX = 16
-        const initialPositionY = height - 32
+        const initialPositionY = height - 45
 
         world.createEntity()
             .addComponent(PlayerTag)
@@ -17,9 +17,13 @@ class Character {
             .addComponent(Animation, {
                 current: "running",
                 animations: {
+                    idle: {
+                        row: 4,
+                        totalFrames: 4
+                    },
                     running: {
                         row: 1,
-                        totalFrames: 5
+                        totalFrames: 6
                     },
                     jumpingUp: {
                         row: 6,
@@ -28,6 +32,10 @@ class Character {
                     jumpingDown: {
                         row: 5,
                         totalFrames: 3
+                    },
+                    doubleJumping: {
+                        row: 8,
+                        totalFrames: 3
                     }
                 }
             })
@@ -35,14 +43,14 @@ class Character {
                 initialPositionY,
                 jumpSpeed: 0,
                 jumpAmount: 2,
-                jumpVariation,
-                maxJumpHeight: 16,
+                jumpVariation: 16,
+                maxJumpHeight: 264,
                 gravity: 3
             })
             .addComponent(Sprite, {
                 image: this.characterImage,
-                width: 16,
-                height: 16,
+                width: 16 * this.scale,
+                height: 16 * this.scale,
                 imageWidth: 16,
                 imageHeight: 16,
                 isSpriteSheet: true,

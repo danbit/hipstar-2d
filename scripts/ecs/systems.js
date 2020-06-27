@@ -14,15 +14,14 @@ class SpriteRendererSystem extends System {
     render(sprite, position, animation) {
         if (sprite.isSpriteSheet) {
             const currentAnimation = animation.animations[animation.current]
-            console.log('animation.current', animation.current)
             image(
                 sprite.image,
                 position.x,
                 position.y,
                 sprite.width,
                 sprite.height,
-                sprite.frame * sprite.width,
-                currentAnimation.row * sprite.height,
+                sprite.frame * sprite.imageWidth,
+                currentAnimation.row * sprite.imageHeight,
                 sprite.imageWidth,
                 sprite.imageHeight
             )
@@ -83,6 +82,7 @@ class PlayerMovementSystem extends System {
         this.position = playerEntity.getMutableComponent(Position);
         this.physics = playerEntity.getMutableComponent(PlayerPhysics);
         this.animation = playerEntity.getMutableComponent(Animation);
+        this.sprite = playerEntity.getMutableComponent(Sprite);
 
         if (hasVerticalInput) {
             this.jump()
@@ -93,22 +93,45 @@ class PlayerMovementSystem extends System {
     }
 
     jump() {
+
         if (this.physics.jumpAmount > 0) {
             game.jumpSound.play()
             this.animation.current = 'jumpingUp'
-            this.physics.jumpSpeed = - this.physics.maxJumpHeight
+            this.physics.jumpSpeed = - this.physics.jumpVariation
             this.physics.jumpAmount--
+            console.log('*********************jumping UP*********************')
         }
     }
 
     appliesGravity() {
         this.position.y += this.physics.jumpSpeed;
         this.physics.jumpSpeed += this.physics.gravity;
-        
-        if (this.position.y > this.physics.initialPositionY) {            
+
+        if (this.position.y > this.physics.initialPositionY) {
             this.position.y = this.physics.initialPositionY;
             this.physics.jumpAmount = 2;
             this.physics.jumpSpeed = 0
+        }
+
+        // TODO create a enum for animations
+        const onGround = this.position.y === this.physics.initialPositionY
+        const jumpingUp = this.animation.current === 'jumpingUp'
+
+        if (onGround) {
+            if (!jumpingUp) {
+                this.animation.current = 'running'
+                this.physics.onGround = true
+            }
+        } else {            
+            if (this.position.y == this.physics.maxJumpHeight) {
+                this.animation.current = 'jumpingDown'
+                console.log('*********************jumping DOWN*********************')
+            }
+            else if (this.position.y < this.physics.maxJumpHeight) {
+                this.animation.current = 'doubleJumping'
+                console.log('*********************Double jump*********************')
+            }
+            this.physics.onGround = false
         }
     }
 }
@@ -127,8 +150,6 @@ class AnimationSystem extends System {
             sprite.frame++;
             if (sprite.frame >= currentAnimation.totalFrames) {
                 sprite.frame = 0;
-                animation.current = 'running'
-                console.log('running')
             }
         });
     }
