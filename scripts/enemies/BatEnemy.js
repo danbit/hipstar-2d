@@ -1,16 +1,25 @@
-class WormEnemy extends Enemy {
-    constructor(enemyImage, world, x, y) {
+const BatEnemyTypes = {
+    BLUE: { rowAnimation: 3 },
+    ORANGE: { rowAnimation: 7 },
+}
+
+class BatEnemy extends Enemy {
+    constructor(enemyImage, world, type = BatEnemyTypes.BLUE, x, y) {
         super(world)
         this.enemyImage = enemyImage
+        this.type = type
+        this.color = color
         this.x = x
         this.y = y
+        this.width = 8
+        this.height = 8
         this.updateEntity()
     }
 
     updateEntity() {
         const scale = 2
-        const initialPositionX = this.x || width - 16
-        const initialPositionY = this.y || height - 38
+        const initialPositionX = this.x || width + 75
+        const initialPositionY = this.y || height - 100
 
         this.entity.addComponent(Position, { x: initialPositionX, y: initialPositionY })
             .addComponent(Velocity, { x: 5, y: 0 })
@@ -18,17 +27,17 @@ class WormEnemy extends Enemy {
                 current: "walking",
                 animations: {
                     walking: {
-                        row: 0,
-                        totalFrames: 6
+                        row: this.type.rowAnimation,
+                        totalFrames: 3
                     }
                 }
             })
             .addComponent(Sprite, {
                 image: this.enemyImage,
-                width: 16 * scale,
-                height: 8 * scale,
-                imageWidth: 16,
-                imageHeight: 8,
+                width: this.width * scale,
+                height: this.height * scale,
+                imageWidth: this.width,
+                imageHeight: this.height,
                 isSpriteSheet: true,
                 frame: 0,
                 collisionOffset: 0.7
