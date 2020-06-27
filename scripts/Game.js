@@ -7,9 +7,9 @@ class Game {
         this.imageForestLayer05 = loadImage('assets/sprites/background/forest/Forest_Layer_05.png');
         this.imageCharSprite = loadImage('assets/sprites/character/herochar_spritesheet.png');
         this.imageEnemyWorm = loadImage('assets/sprites/enemies/worm_spritesheet.png');
-        this.imageEnemySlime = loadImage('assets/sprites/enemies/worm_spritesheet.png');
+        this.imageEnemySlime = loadImage('assets/sprites/enemies/slime_spritesheet.png');
         this.soundtrack = loadSound('assets/sounds/trilha_jogo.mp3');
-        this.jumpSound = loadSound('assets/sounds/somPulo.mp3');
+        this.jumpSound = loadSound('assets/sounds/sound_jump.mp3');
     }
 
     onStart() {
@@ -40,8 +40,8 @@ class Game {
             this.imageForestLayer05],
             this.world)
         this.player = new Character(this.imageCharSprite, this.world)
-        this.worm = new Enemy(this.imageEnemyWorm, this.world)
-        this.slime = new Enemy(this.imageEnemySlime, this.world)
+        this.worm = new WormEnemy(this.imageEnemyWorm, this.world)
+        this.slime = new SlimeEnemy(this.imageEnemySlime, this.world)
 
         this.soundtrack.loop();
     }

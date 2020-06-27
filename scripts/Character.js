@@ -1,13 +1,13 @@
 class Character {
     constructor(characterImage, world) {
         this.characterImage = characterImage
-        this.scale = 1.5;
+        this.scale = 2;
         this.createEntities(world)
     }
 
     createEntities(world) {
         const initialPositionX = 16
-        const initialPositionY = height - 45
+        const initialPositionY = height - 54
 
         world.createEntity()
             .addComponent(PlayerTag)
