@@ -9,18 +9,14 @@ preload = () => {
 
 setup = () => {
   createCanvas(640, 360)
-  frameRate(30)
+  frameRate(40)
   game.onStart()
 }
 
 keyPressed = () => {
-  game.onInput('keyPressed', key)
+  game.onInput('keyPressed', key, keyCode)
 }
 
 draw = () => {
   game.onUpdate()
-}
-
-windowResized = () => {
-  resizeCanvas(window.innerWidth, window.innerHeight)
 }

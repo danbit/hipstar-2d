@@ -21,6 +21,7 @@ Sprite.schema = {
   height: { type: Types.Number },
   frame: { type: Types.Number },
   collisionOffset: { type: Types.Number },
+  flipImage: { type: Types.Boolean },
 }
 
 class Velocity extends Component { }
@@ -32,6 +33,7 @@ Velocity.schema = {
 class PlayerInput extends Component {}
 PlayerInput.schema = {
   key: { type: Types.String },
+  keyCode: { type: Types.String },
 }
 
 class PlayerPhysics extends Component {}

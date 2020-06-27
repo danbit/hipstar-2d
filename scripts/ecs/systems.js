@@ -6,13 +6,6 @@ class SpriteRendererSystem extends System {
             const sprite = entity.getComponent(Sprite)
             const position = entity.getComponent(Position)
             const animation = entity.getComponent(Animation)
-
-            const enemy = entity.getComponent(EnemyTag)
-            if (enemy) {
-                // console.log('enemy sprite', animation)
-
-            }
-
             this.render(sprite, position, animation)
         })
     }
@@ -20,9 +13,16 @@ class SpriteRendererSystem extends System {
     render(sprite, position, animation) {
         if (sprite.isSpriteSheet) {
             const currentAnimation = animation.animations[animation.current]
+            let positionX = position.x
+
+            if (sprite.flipImage) {
+                push(); //save current "default" matrix
+                scale(-1, 1); //scale the matrix
+                positionX = -position.x - sprite.width
+            }
             image(
                 sprite.image,
-                position.x,
+                positionX,
                 position.y,
                 sprite.width,
                 sprite.height,
@@ -31,6 +31,9 @@ class SpriteRendererSystem extends System {
                 sprite.imageWidth,
                 sprite.imageHeight
             )
+            if (sprite.flipImage) {
+                pop();
+            }
         } else {
             image(
                 sprite.image,
@@ -64,7 +67,7 @@ class HorizontalMovementSystem extends System {
             }
         })
 
-        let nextBackgroundIndex = 1
+        // let nextBackgroundIndex = 1
         const backgrounds = this.queries.backgrounds.results
 
         for (let i = 0; i < backgrounds.length; i++) {
@@ -106,8 +109,7 @@ class PlayerMovementSystem extends System {
 
         this.queries.inputs.results.forEach(entity => {
             const input = entity.getComponent(PlayerInput)
-
-            if (input.key === 'ArrowUp') {
+            if (input.keyCode === 38 || input.keyCode === 32) {
                 hasVerticalInput = true
             }
             entity.removeComponent(PlayerInput, true)
@@ -136,7 +138,6 @@ class PlayerMovementSystem extends System {
             this.animation.current = 'jumpingUp'
             this.physics.jumpSpeed = - this.physics.jumpVariation
             this.physics.jumpAmount--
-            console.log('*********************jumping UP*********************')
         }
     }
 

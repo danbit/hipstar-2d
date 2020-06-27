@@ -14,7 +14,8 @@ class WormEnemy extends Enemy {
         const initialPositionX = this.x || width - 16
         const initialPositionY = this.y || height - 38
 
-        this.entity.addComponent(Position, { x: initialPositionX, y: initialPositionY })
+        this.entity
+            .addComponent(Position, { x: initialPositionX, y: initialPositionY })
             .addComponent(Velocity, { x: 5, y: 0 })
             .addComponent(Animation, {
                 current: "walking",

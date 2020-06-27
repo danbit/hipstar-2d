@@ -44,7 +44,7 @@ class Character {
                 jumpSpeed: 0,
                 jumpAmount: 2,
                 jumpVariation: 16,
-                maxJumpHeight: 264,
+                maxJumpHeight: 255,
                 gravity: 3
             })
             .addComponent(Sprite, {

@@ -48,6 +48,7 @@ class Game {
         this.mushroom = new MushroomEnemy(this.imageEnemyMushroom, this.world)
         this.goblin = new GoblinEnemy(this.imageEnemyGoblin, this.world)
         this.batBlue = new BatEnemy(this.imageEnemyBats, this.world)
+        this.batOrange = new BatEnemy(this.imageEnemyBats, this.world, BatEnemyTypes.ORANGE)
         this.soundtrack.loop()
     }
 
@@ -56,12 +57,12 @@ class Game {
         this.world.execute(deltaTime)
     }
 
-    onInput(type, key) {
+    onInput(type, key, keyCode) {
         if (type === 'keyPressed') {
             if (isGameOver) {
                 window.location.reload()
             }
-            this.world.createEntity().addComponent(PlayerInput, { key })
+            this.world.createEntity().addComponent(PlayerInput, { key, keyCode })
         }
     }
 }

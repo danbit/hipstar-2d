@@ -33,7 +33,8 @@ class GoblinEnemy extends Enemy {
                 imageHeight: this.height,
                 isSpriteSheet: true,
                 frame: 0,
-                collisionOffset: 0.7
+                collisionOffset: 0.7,
+                flipImage: true
             })
     }
 }
