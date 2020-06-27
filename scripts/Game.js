@@ -5,7 +5,9 @@ class Game {
         this.imageForestLayer03 = loadImage('assets/sprites/background/forest/Forest_Layer_03.png');
         this.imageForestLayer04 = loadImage('assets/sprites/background/forest/Forest_Layer_04.png');
         this.imageForestLayer05 = loadImage('assets/sprites/background/forest/Forest_Layer_05.png');
-        this.imageCharSprite = loadImage('assets/sprites/character/herochar_spritesheet.png');        
+        this.imageCharSprite = loadImage('assets/sprites/character/herochar_spritesheet.png');
+        this.imageEnemyWorm = loadImage('assets/sprites/enemies/worm_spritesheet.png');
+        this.imageEnemySlime = loadImage('assets/sprites/enemies/worm_spritesheet.png');
         this.soundtrack = loadSound('assets/sounds/trilha_jogo.mp3');
         this.jumpSound = loadSound('assets/sounds/somPulo.mp3');
     }
@@ -30,10 +32,17 @@ class Game {
             .registerSystem(PlayerMovementSystem)
             .registerSystem(CollisionSystem)
 
-        this.background = new Background([this.imageForestLayer01, this.imageForestLayer02, this.imageForestLayer03,
-        this.imageForestLayer04, this.imageForestLayer05], this.world)
-
+        this.background = new Background([
+            this.imageForestLayer01,
+            this.imageForestLayer02,
+            this.imageForestLayer03,
+            this.imageForestLayer04,
+            this.imageForestLayer05],
+            this.world)
         this.player = new Character(this.imageCharSprite, this.world)
+        this.worm = new Enemy(this.imageEnemyWorm, this.world)
+        this.slime = new Enemy(this.imageEnemySlime, this.world)
+
         this.soundtrack.loop();
     }
 

@@ -7,6 +7,12 @@ class SpriteRendererSystem extends System {
             const position = entity.getComponent(Position);
             const animation = entity.getComponent(Animation);
 
+            const enemy = entity.getComponent(EnemyTag);
+            if (enemy) {
+                // console.log('enemy sprite', animation)
+
+            }
+
             this.render(sprite, position, animation);
         });
     }
@@ -57,10 +63,35 @@ class HorizontalMovementSystem extends System {
                 position.x = width;
             }
         });
+
+        let nextBackgroundIndex = 1;
+        let previousBackgroundIndex = 0;
+        const backgrounds = this.queries.backgrounds.results;
+
+        for (let i = 0; i < backgrounds.length; i++) {
+            const backgroundEntity = backgrounds[i];
+            const position = backgroundEntity.getMutableComponent(Position);
+            const velocity = backgroundEntity.getComponent(Velocity);
+    
+            position.x -= velocity.x;
+            console.log('nextBackground', nextBackgroundIndex)
+    
+            if (position.x <= -width) {
+                const nextBackgroundEntity = backgrounds[nextBackgroundIndex];
+                const nextBackgroundPosition = nextBackgroundEntity.getMutableComponent(Position);
+                position.x = width + nextBackgroundPosition.x;
+            }
+
+            nextBackgroundIndex++;
+            if(nextBackgroundIndex >= backgrounds.length){
+                nextBackgroundIndex = 0
+            }
+        }
     }
 }
 HorizontalMovementSystem.queries = {
-    entities: { components: [Position, Velocity] },
+    entities: { components: [Not(BackgroundTag), Position, Velocity] },
+    backgrounds: { components: [BackgroundTag, Position, Velocity] },
 }
 
 class PlayerMovementSystem extends System {
@@ -117,19 +148,15 @@ class PlayerMovementSystem extends System {
         const onGround = this.position.y === this.physics.initialPositionY
         const jumpingUp = this.animation.current === 'jumpingUp'
 
-        if (onGround) {
-            if (!jumpingUp) {
-                this.animation.current = 'running'
-                this.physics.onGround = true
-            }
-        } else {            
+        if (onGround && !jumpingUp) {
+            this.animation.current = 'running'
+            this.physics.onGround = true
+        } else {
             if (this.position.y == this.physics.maxJumpHeight) {
                 this.animation.current = 'jumpingDown'
-                console.log('*********************jumping DOWN*********************')
             }
             else if (this.position.y < this.physics.maxJumpHeight) {
                 this.animation.current = 'doubleJumping'
-                console.log('*********************Double jump*********************')
             }
             this.physics.onGround = false
         }
