@@ -25,23 +25,16 @@ class CollisionSystem extends System {
         if (window.disableAllCollisions) {
             return
         }
+        const gameEntity = this.queries.game.results[0]
         const player = this.queries.player.results[0]
+
         this.queries.enimies.results.forEach(enemy => {
             if (this.isColliding(player, enemy)) {
-                this.gameOver()
+                const gameState = gameEntity.getMutableComponent(GameState)
+                gameState.gameOver = true
             }
         })
-    }
 
-    gameOver() {
-        background('rgba(0%,0%,0%,.80)')
-        fill("#cc0000")
-        game.soundtrack.stop()
-        textAlign(CENTER)
-        textSize(36)
-        text("Game Over", width / 2, height / 2)
-        isGameOver = true
-        noLoop()
     }
 
     isColliding(player, enemy) {
@@ -64,6 +57,7 @@ class CollisionSystem extends System {
     }
 }
 CollisionSystem.queries = {
+    game: { components: [GameState] },
     player: { components: [Collidable, PlayerTag] },
     enimies: { components: [Collidable, EnemyTag] },
 }
@@ -117,8 +111,8 @@ class SpriteRendererSystem extends System {
             let positionX = position.x
 
             if (sprite.flipImage) {
-                push(); //save current "default" matrix
-                scale(-1, 1); //scale the matrix
+                push() //save current "default" matrix
+                scale(-1, 1) //scale the matrix
                 positionX = -position.x - sprite.width
             }
             image(
@@ -133,7 +127,7 @@ class SpriteRendererSystem extends System {
                 sprite.imageHeight
             )
             if (sprite.flipImage) {
-                pop();
+                pop()
             }
         } else {
             image(
@@ -238,7 +232,7 @@ class EnemyWaveSystem extends System {
     }
     randomEnemy() {
         const enemies = this.world.entityManager.queryComponents([EnemyTag]).entities
-        return enemies[Math.floor(random(0, enemies.length))];
+        return enemies[Math.floor(random(0, enemies.length))]
     }
 
     randomSpeedX(velocity) {
@@ -253,3 +247,70 @@ EnemyWaveSystem.queries = {
         }
     },
 }
+
+class ScoreSystem extends System {
+    execute(_delta, _time) {
+        const gameQuery = this.queries.game
+
+        let gameEntity = gameQuery.results[0]
+        const gameState = gameEntity.getComponent(GameState)
+        const score = gameEntity.getMutableComponent(Score)
+
+        if (gameState.isRunning) {
+            score.value += 0.2
+        }
+    }
+}
+ScoreSystem.queries = {
+    game: {
+        components: [GameState, Score],
+    }
+}
+
+class GUISystem extends System {
+    execute(_delta, _time) {
+        this.queries.game.changed.forEach(entity => {
+            const gameState = entity.getComponent(GameState)
+            if (gameState.gameOver) {
+                this.gameOver()
+            }
+        })
+
+        this.queries.score.changed.forEach(entity => {
+            const score = entity.getComponent(Score)
+            this.chageScore(score)
+        })
+    }
+
+    chageScore(score) {
+        textAlign(RIGHT)
+        fill('#FFF')
+        textSize(30)
+        text(parseInt(score.value), width - 10, 30)
+    }
+
+    gameOver() {
+        background('rgba(0%,0%,0%,.80)')
+        fill("#cc0000")
+        game.soundtrack.stop() // TODO create sound system
+        textAlign(CENTER)
+        textSize(36)
+        text("Game Over", width / 2, height / 2)
+        noLoop()
+    }
+}
+GUISystem.queries = {
+    game: {
+        components: [GameState],
+        listen: {
+            changed: [GameState]
+        }
+    },
+    score: {
+        components: [Score],
+        listen: {
+            changed: [Score]
+        }
+    }
+}
+

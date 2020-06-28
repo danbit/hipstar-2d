@@ -57,7 +57,13 @@ Animation.schema = {
   frameDelay: { type: Types.Number },
 }
 
-class GameObject extends Component { }
-GameObject.schema = {
-  enabled: { type: Types.Boolean, default: true },
+class GameState extends Component { }
+GameState.schema = {
+  isRunning: { type: Types.Boolean },
+  gameOver: { type: Types.Boolean },
+}
+
+class Score extends Component { }
+Score.schema = {
+  value: { type: Types.Boolean },
 }

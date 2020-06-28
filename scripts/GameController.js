@@ -30,12 +30,20 @@ class GameController {
             .registerComponent(PlayerInput)
             .registerComponent(PlayerPhysics)
             .registerComponent(Animation)
+            .registerComponent(Score)
+            .registerComponent(GameState)
             .registerSystem(SpriteRendererSystem)
             .registerSystem(HorizontalMovementSystem)
             .registerSystem(AnimationSystem)
             .registerSystem(PlayerMovementSystem)
             .registerSystem(CollisionSystem)
             .registerSystem(EnemyWaveSystem)
+            .registerSystem(ScoreSystem)
+            .registerSystem(GUISystem)
+
+        this.gameEntity = this.world.createEntity()
+            .addComponent(GameState, { isRunning: true })
+            .addComponent(Score, { value: 0 })
 
         this.background = new Background([
             this.imageForestLayer01,
@@ -52,7 +60,7 @@ class GameController {
         const batBlue = new BatEnemy(this.imageEnemyBats, this.world)
         const batOrange = new BatEnemy(this.imageEnemyBats, this.world, BatEnemyTypes.ORANGE)
         const goblin = new GoblinEnemy(this.imageEnemyGoblin, this.world)
-        
+
         this.enemies = []
         this.enemies.push(worm)
         this.enemies.push(slime)
@@ -72,10 +80,10 @@ class GameController {
 
     onInput(type, key, keyCode) {
         if (type === 'keyPressed') {
-            if (isGameOver) {
+            if (this.gameEntity.getComponent(GameState).gameOver) {
                 window.location.reload()
             }
-            this.world.createEntity().addComponent(PlayerInput, { key, keyCode })
+            this.gameEntity.addComponent(PlayerInput, { key, keyCode })
         }
     }
 }
