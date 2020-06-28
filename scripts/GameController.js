@@ -49,25 +49,25 @@ class GameController {
         const worm = new WormEnemy(this.imageEnemyWorm, this.world)
         const slime = new SlimeEnemy(this.imageEnemySlime, this.world)
         const mushroom = new MushroomEnemy(this.imageEnemyMushroom, this.world)
-        const goblin = new GoblinEnemy(this.imageEnemyGoblin, this.world)
         const batBlue = new BatEnemy(this.imageEnemyBats, this.world)
         const batOrange = new BatEnemy(this.imageEnemyBats, this.world, BatEnemyTypes.ORANGE)
+        const goblin = new GoblinEnemy(this.imageEnemyGoblin, this.world)
         
         this.enemies = []
         this.enemies.push(worm)
         this.enemies.push(slime)
         this.enemies.push(mushroom)
-        this.enemies.push(goblin)
         this.enemies.push(batBlue)
         this.enemies.push(batOrange)
+        this.enemies.push(goblin)
         this.enemyController = new EnemyController(this.world, this.enemies)
 
         this.soundtrack.loop()
     }
 
-    onUpdate() {
+    onUpdate(delta, time) {
         // Run all the systems
-        this.world.execute(deltaTime)
+        this.world.execute(delta, time)
     }
 
     onInput(type, key, keyCode) {

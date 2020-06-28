@@ -25,7 +25,9 @@ class SlimeEnemy extends Enemy {
                         row: 0,
                         totalFrames: 15
                     }
-                }
+                },
+                cycles: 0,
+                frameDelay: 2
             })
             .addComponent(Sprite, {
                 image: this.enemyImage,

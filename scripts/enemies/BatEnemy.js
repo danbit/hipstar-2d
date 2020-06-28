@@ -34,7 +34,9 @@ class BatEnemy extends Enemy {
                         row: this.type.rowAnimation,
                         totalFrames: 3
                     }
-                }
+                },
+                cycles: 0,
+                frameDelay: 2
             })
             .addComponent(Sprite, {
                 image: this.enemyImage,

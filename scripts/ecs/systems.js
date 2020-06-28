@@ -4,10 +4,14 @@ class AnimationSystem extends System {
             const sprite = entity.getMutableComponent(Sprite)
             const animation = entity.getMutableComponent(Animation)
             const currentAnimation = animation.animations[animation.current]
+            animation.cycles++
 
-            sprite.frame++
-            if (sprite.frame >= currentAnimation.totalFrames) {
-                sprite.frame = 0
+            if (animation.cycles % animation.frameDelay === 0) {
+                sprite.frame++
+                if (sprite.frame >= currentAnimation.totalFrames) {
+                    sprite.frame = 0
+                    animation.cycles = 0
+                }
             }
         })
     }
@@ -34,7 +38,7 @@ class CollisionSystem extends System {
         fill("#cc0000")
         game.soundtrack.stop()
         textAlign(CENTER)
-        textSize(48)
+        textSize(36)
         text("Game Over", width / 2, height / 2)
         isGameOver = true
         noLoop()
@@ -237,7 +241,7 @@ class EnemyWaveSystem extends System {
         return enemies[Math.floor(random(0, enemies.length))];
     }
 
-    randomSpeedX(velocity){
+    randomSpeedX(velocity) {
         return math.random(velocity.minX, velocity.maxX)
     }
 }
