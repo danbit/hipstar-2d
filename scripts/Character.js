@@ -10,6 +10,7 @@ class Character {
         const initialPositionY = height - 54
 
         world.createEntity()
+            .addComponent(Collidable)
             .addComponent(PlayerTag)
             .addComponent(Renderable)
             .addComponent(Animable)
@@ -44,7 +45,7 @@ class Character {
                 jumpSpeed: 0,
                 jumpAmount: 2,
                 jumpVariation: 16,
-                maxJumpHeight: 264,
+                maxJumpHeight: 255,
                 gravity: 3
             })
             .addComponent(Sprite, {

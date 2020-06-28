@@ -6,16 +6,18 @@ class MushroomEnemy extends Enemy {
         this.y = y
         this.width = 16
         this.height = 16
+        this.maxSpeedX = 4
+        this.minSpeedX = 5
         this.updateEntity()
     }
 
     updateEntity() {
         const scale = 2
-        const initialPositionX = this.x || width + 48
+        const initialPositionX = this.x || width + this.width
         const initialPositionY = this.y || height - 54
 
         this.entity.addComponent(Position, { x: initialPositionX, y: initialPositionY })
-            .addComponent(Velocity, { x: 5, y: 0 })
+            .addComponent(Velocity, { x: 0, y: 0, maxX: this.maxSpeedX, minX: this.minSpeedX })
             .addComponent(Animation, {
                 current: "walking",
                 animations: {
@@ -33,7 +35,8 @@ class MushroomEnemy extends Enemy {
                 imageHeight: this.height,
                 isSpriteSheet: true,
                 frame: 0,
-                collisionOffset: 0.7
+                collisionOffset: 0.7,
+                flipImage: true
             })
     }
 }

@@ -1,4 +1,4 @@
-class Game {
+class GameController {
     onCreate() {
         this.imageForestLayer01 = loadImage('assets/sprites/background/forest/Forest_Layer_01.png')
         this.imageForestLayer02 = loadImage('assets/sprites/background/forest/Forest_Layer_02.png')
@@ -25,6 +25,7 @@ class Game {
             .registerComponent(Sprite)
             .registerComponent(Velocity)
             .registerComponent(Animable)
+            .registerComponent(Collidable)
             .registerComponent(Renderable)
             .registerComponent(PlayerInput)
             .registerComponent(PlayerPhysics)
@@ -34,6 +35,7 @@ class Game {
             .registerSystem(AnimationSystem)
             .registerSystem(PlayerMovementSystem)
             .registerSystem(CollisionSystem)
+            .registerSystem(EnemyWaveSystem)
 
         this.background = new Background([
             this.imageForestLayer01,
@@ -43,11 +45,23 @@ class Game {
             this.imageForestLayer05],
             this.world)
         this.player = new Character(this.imageCharSprite, this.world)
-        this.worm = new WormEnemy(this.imageEnemyWorm, this.world)
-        this.slime = new SlimeEnemy(this.imageEnemySlime, this.world)
-        this.mushroom = new MushroomEnemy(this.imageEnemyMushroom, this.world)
-        this.goblin = new GoblinEnemy(this.imageEnemyGoblin, this.world)
-        this.batBlue = new BatEnemy(this.imageEnemyBats, this.world)
+
+        const worm = new WormEnemy(this.imageEnemyWorm, this.world)
+        const slime = new SlimeEnemy(this.imageEnemySlime, this.world)
+        const mushroom = new MushroomEnemy(this.imageEnemyMushroom, this.world)
+        const goblin = new GoblinEnemy(this.imageEnemyGoblin, this.world)
+        const batBlue = new BatEnemy(this.imageEnemyBats, this.world)
+        const batOrange = new BatEnemy(this.imageEnemyBats, this.world, BatEnemyTypes.ORANGE)
+        
+        this.enemies = []
+        this.enemies.push(worm)
+        this.enemies.push(slime)
+        this.enemies.push(mushroom)
+        this.enemies.push(goblin)
+        this.enemies.push(batBlue)
+        this.enemies.push(batOrange)
+        this.enemyController = new EnemyController(this.world, this.enemies)
+
         this.soundtrack.loop()
     }
 
@@ -56,12 +70,12 @@ class Game {
         this.world.execute(deltaTime)
     }
 
-    onInput(type, key) {
+    onInput(type, key, keyCode) {
         if (type === 'keyPressed') {
             if (isGameOver) {
                 window.location.reload()
             }
-            this.world.createEntity().addComponent(PlayerInput, { key })
+            this.world.createEntity().addComponent(PlayerInput, { key, keyCode })
         }
     }
 }

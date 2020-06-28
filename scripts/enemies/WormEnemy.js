@@ -5,17 +5,20 @@ class WormEnemy extends Enemy {
         this.x = x
         this.y = y
         this.width = 16
-        this.height = 8
+        this.height = 8        
+        this.maxSpeedX = 4
+        this.minSpeedX= 5
         this.updateEntity()
     }
 
     updateEntity() {
         const scale = 2
-        const initialPositionX = this.x || width - 16
+        const initialPositionX = this.x || width  + this.width
         const initialPositionY = this.y || height - 38
 
-        this.entity.addComponent(Position, { x: initialPositionX, y: initialPositionY })
-            .addComponent(Velocity, { x: 5, y: 0 })
+        this.entity
+            .addComponent(Position, { x: initialPositionX, y: initialPositionY })
+            .addComponent(Velocity, { x: 0, y: 0, maxX: this.maxSpeedX, minX: this.minSpeedX })
             .addComponent(Animation, {
                 current: "walking",
                 animations: {

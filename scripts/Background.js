@@ -5,14 +5,14 @@ class Background {
     }
 
     createEntities(world) {
-        let backgroundSpeed = 3
+        let backgroundSpeed = 5
 
         for (let index = 0; index < this.images.length; index++) {
             const image = this.images[index]
 
             world.createEntity()
                 .addComponent(BackgroundTag)
-                .addComponent(Renderable)
+                .addComponent(Renderable,)
                 .addComponent(Position, { x: 0, y: 0 })
                 .addComponent(Velocity, { x: backgroundSpeed, y: 0 })
                 .addComponent(Sprite, { image, width, height })

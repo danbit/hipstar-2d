@@ -1,5 +1,5 @@
-const game = new Game()
-window.disableAllCollisions = true
+const game = new GameController()
+window.disableAllCollisions = false
 
 let isGameOver
 
@@ -14,13 +14,9 @@ setup = () => {
 }
 
 keyPressed = () => {
-  game.onInput('keyPressed', key)
+  game.onInput('keyPressed', key, keyCode)
 }
 
 draw = () => {
   game.onUpdate()
-}
-
-windowResized = () => {
-  resizeCanvas(window.innerWidth, window.innerHeight)
 }

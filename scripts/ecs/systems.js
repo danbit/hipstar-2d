@@ -1,178 +1,3 @@
-class SpriteRendererSystem extends System {
-    // This method will get called on every frame by default
-    execute(_delta, _time) {
-        // Iterate through all the entities on the query
-        this.queries.renderables.results.forEach(entity => {
-            const sprite = entity.getComponent(Sprite)
-            const position = entity.getComponent(Position)
-            const animation = entity.getComponent(Animation)
-
-            const enemy = entity.getComponent(EnemyTag)
-            if (enemy) {
-                // console.log('enemy sprite', animation)
-
-            }
-
-            this.render(sprite, position, animation)
-        })
-    }
-
-    render(sprite, position, animation) {
-        if (sprite.isSpriteSheet) {
-            const currentAnimation = animation.animations[animation.current]
-            image(
-                sprite.image,
-                position.x,
-                position.y,
-                sprite.width,
-                sprite.height,
-                sprite.frame * sprite.imageWidth,
-                currentAnimation.row * sprite.imageHeight,
-                sprite.imageWidth,
-                sprite.imageHeight
-            )
-        } else {
-            image(
-                sprite.image,
-                position.x,
-                position.y,
-                sprite.width,
-                sprite.height
-            )
-        }
-        if (window.enableRenderCollider) {
-            noFill()
-            rect(position.x, position.y, sprite.width, sprite.height)
-        }
-    }
-}
-// Define a query of entities that have "Renderable" and "Sprite" components
-SpriteRendererSystem.queries = {
-    renderables: { components: [Renderable, Sprite] }
-}
-
-class HorizontalMovementSystem extends System {
-    execute(_delta, _time) {
-        this.queries.entities.results.forEach(entity => {
-            const position = entity.getMutableComponent(Position)
-            const velocity = entity.getComponent(Velocity)
-
-            position.x -= velocity.x
-
-            if (position.x < -width) {
-                position.x = width
-            }
-        })
-
-        let nextBackgroundIndex = 1
-        const backgrounds = this.queries.backgrounds.results
-
-        for (let i = 0; i < backgrounds.length; i++) {
-            const backgroundEntity = backgrounds[i]
-            const position = backgroundEntity.getMutableComponent(Position)
-            const velocity = backgroundEntity.getComponent(Velocity)
-
-            position.x -= velocity.x
-
-            if (position.x <= -width) {
-                position.x = width
-            }
-
-            // const nextBackgroundEntity = backgrounds[nextBackgroundIndex]
-            // const nextBackgroundPosition = nextBackgroundEntity.getMutableComponent(Position)
-
-
-            // if (nextBackgroundPosition.x <= -width) {
-            //     nextBackgroundPosition.x = width + position.x
-            // }
-
-            // console.log('nextBackground', nextBackgroundIndex)
-
-            // nextBackgroundIndex++
-            // if (nextBackgroundIndex >= backgrounds.length) {
-            //     nextBackgroundIndex = 0
-            // }
-        }
-    }
-}
-HorizontalMovementSystem.queries = {
-    entities: { components: [Not(BackgroundTag), Position, Velocity] },
-    backgrounds: { components: [BackgroundTag, Position, Velocity] },
-}
-
-class PlayerMovementSystem extends System {
-    execute(_delta, _time) {
-        let hasVerticalInput = false
-
-        this.queries.inputs.results.forEach(entity => {
-            const input = entity.getComponent(PlayerInput)
-
-            if (input.key === 'ArrowUp') {
-                hasVerticalInput = true
-            }
-            entity.removeComponent(PlayerInput, true)
-        })
-
-        const playerEntity = this.queries.player.results[0]
-        if (!playerEntity) return
-
-        this.position = playerEntity.getMutableComponent(Position)
-        this.physics = playerEntity.getMutableComponent(PlayerPhysics)
-        this.animation = playerEntity.getMutableComponent(Animation)
-        this.sprite = playerEntity.getMutableComponent(Sprite)
-
-        if (hasVerticalInput) {
-            this.jump()
-        }
-
-        this.appliesGravity()
-        playerEntity.removeComponent(PlayerInput, true)
-    }
-
-    jump() {
-
-        if (this.physics.jumpAmount > 0) {
-            game.jumpSound.play()
-            this.animation.current = 'jumpingUp'
-            this.physics.jumpSpeed = - this.physics.jumpVariation
-            this.physics.jumpAmount--
-            console.log('*********************jumping UP*********************')
-        }
-    }
-
-    appliesGravity() {
-        this.position.y += this.physics.jumpSpeed
-        this.physics.jumpSpeed += this.physics.gravity
-
-        if (this.position.y > this.physics.initialPositionY) {
-            this.position.y = this.physics.initialPositionY
-            this.physics.jumpAmount = 2
-            this.physics.jumpSpeed = 0
-        }
-
-        // TODO create a enum for animations
-        const onGround = this.position.y === this.physics.initialPositionY
-        const jumpingUp = this.animation.current === 'jumpingUp'
-
-        if (onGround && !jumpingUp) {
-            this.animation.current = 'running'
-            this.physics.onGround = true
-        } else {
-            if (this.position.y == this.physics.maxJumpHeight) {
-                this.animation.current = 'jumpingDown'
-            }
-            else if (this.position.y < this.physics.maxJumpHeight) {
-                this.animation.current = 'doubleJumping'
-            }
-            this.physics.onGround = false
-        }
-    }
-}
-PlayerMovementSystem.queries = {
-    player: { components: [PlayerTag, Position, PlayerPhysics] },
-    inputs: { components: [PlayerInput] },
-}
-
 class AnimationSystem extends System {
     execute(_delta, _time) {
         this.queries.entities.results.forEach(entity => {
@@ -235,6 +60,192 @@ class CollisionSystem extends System {
     }
 }
 CollisionSystem.queries = {
-    player: { components: [PlayerTag, Position, Sprite] },
-    enimies: { components: [EnemyTag, Position, Sprite] },
+    player: { components: [Collidable, PlayerTag] },
+    enimies: { components: [Collidable, EnemyTag] },
+}
+
+class HorizontalMovementSystem extends System {
+    execute(_delta, _time) {
+        this.queries.entities.results.forEach(entity => {
+            const position = entity.getMutableComponent(Position)
+            const velocity = entity.getComponent(Velocity)
+
+            position.x -= velocity.x
+            if (position.x < -width) {
+                position.x = width
+            }
+        })
+
+        this.queries.enemies.results.forEach(entity => {
+            const position = entity.getMutableComponent(Position)
+            const velocity = entity.getMutableComponent(Velocity)
+            const sprite = entity.getComponent(Sprite)
+
+            position.x -= velocity.x
+            if (position.x < -sprite.width * 2) {
+                entity.removeComponent(Renderable)
+                velocity.x = 0
+                position.x = width + sprite.width
+            }
+        })
+    }
+}
+HorizontalMovementSystem.queries = {
+    entities: { components: [Position, Velocity] },
+    enemies: { components: [EnemyTag, Position, Velocity] },
+}
+
+class SpriteRendererSystem extends System {
+    // This method will get called on every frame by default
+    execute(_delta, _time) {
+        // Iterate through all the entities on the query
+        this.queries.renderables.results.forEach(entity => {
+            const sprite = entity.getComponent(Sprite)
+            const position = entity.getComponent(Position)
+            const animation = entity.getComponent(Animation)
+            this.render(sprite, position, animation)
+        })
+    }
+
+    render(sprite, position, animation) {
+        if (sprite.isSpriteSheet) {
+            const currentAnimation = animation.animations[animation.current]
+            let positionX = position.x
+
+            if (sprite.flipImage) {
+                push(); //save current "default" matrix
+                scale(-1, 1); //scale the matrix
+                positionX = -position.x - sprite.width
+            }
+            image(
+                sprite.image,
+                positionX,
+                position.y,
+                sprite.width,
+                sprite.height,
+                sprite.frame * sprite.imageWidth,
+                currentAnimation.row * sprite.imageHeight,
+                sprite.imageWidth,
+                sprite.imageHeight
+            )
+            if (sprite.flipImage) {
+                pop();
+            }
+        } else {
+            image(
+                sprite.image,
+                position.x,
+                position.y,
+                sprite.width,
+                sprite.height
+            )
+        }
+        if (window.enableRenderCollider) {
+            noFill()
+            rect(position.x, position.y, sprite.width, sprite.height)
+        }
+    }
+}
+// Define a query of entities that have "Renderable" and "Sprite" components
+SpriteRendererSystem.queries = {
+    renderables: { components: [Renderable, Sprite] }
+}
+
+class PlayerMovementSystem extends System {
+    execute(_delta, _time) {
+        let hasVerticalInput = false
+
+        this.queries.inputs.results.forEach(entity => {
+            const input = entity.getComponent(PlayerInput)
+            if (input.keyCode === 38 || input.keyCode === 32) {
+                hasVerticalInput = true
+            }
+            entity.removeComponent(PlayerInput, true)
+        })
+
+        const playerEntity = this.queries.player.results[0]
+        if (!playerEntity) return
+
+        this.position = playerEntity.getMutableComponent(Position)
+        this.physics = playerEntity.getMutableComponent(PlayerPhysics)
+        this.animation = playerEntity.getMutableComponent(Animation)
+        this.sprite = playerEntity.getMutableComponent(Sprite)
+
+        if (hasVerticalInput) {
+            this.jump()
+        }
+
+        this.appliesGravity()
+        playerEntity.removeComponent(PlayerInput, true)
+    }
+
+    jump() {
+
+        if (this.physics.jumpAmount > 0) {
+            game.jumpSound.play()
+            this.animation.current = 'jumpingUp'
+            this.physics.jumpSpeed = - this.physics.jumpVariation
+            this.physics.jumpAmount--
+        }
+    }
+
+    appliesGravity() {
+        this.position.y += this.physics.jumpSpeed
+        this.physics.jumpSpeed += this.physics.gravity
+
+        if (this.position.y > this.physics.initialPositionY) {
+            this.position.y = this.physics.initialPositionY
+            this.physics.jumpAmount = 2
+            this.physics.jumpSpeed = 0
+        }
+
+        // TODO create a enum for animations
+        const onGround = this.position.y === this.physics.initialPositionY
+        const jumpingUp = this.animation.current === 'jumpingUp'
+
+        if (onGround && !jumpingUp) {
+            this.animation.current = 'running'
+            this.physics.onGround = true
+        } else {
+            if (this.position.y == this.physics.maxJumpHeight) {
+                this.animation.current = 'jumpingDown'
+            }
+            else if (this.position.y < this.physics.maxJumpHeight) {
+                this.animation.current = 'doubleJumping'
+            }
+            this.physics.onGround = false
+        }
+    }
+}
+PlayerMovementSystem.queries = {
+    player: { components: [PlayerTag, Position, PlayerPhysics] },
+    inputs: { components: [PlayerInput] },
+}
+
+class EnemyWaveSystem extends System {
+    execute(_delta, _time) {
+        this.queries.entities.removed.forEach(entity => {
+            const enemyEntity = this.randomEnemy()
+            enemyEntity.addComponent(Renderable)
+
+            const velocity = enemyEntity.getMutableComponent(Velocity)
+            velocity.x = this.randomSpeedX(velocity)
+        })
+    }
+    randomEnemy() {
+        const enemies = this.world.entityManager.queryComponents([EnemyTag]).entities
+        return enemies[Math.floor(random(0, enemies.length))];
+    }
+
+    randomSpeedX(velocity){
+        return math.random(velocity.minX, velocity.maxX)
+    }
+}
+EnemyWaveSystem.queries = {
+    entities: {
+        components: [EnemyTag, Renderable],
+        listen: {
+            removed: true,
+        }
+    },
 }

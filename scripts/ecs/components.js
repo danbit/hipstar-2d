@@ -1,6 +1,6 @@
 class Renderable extends TagComponent { }
-class Collidable extends TagComponent {}
-class Animable extends TagComponent {}
+class Collidable extends TagComponent { }
+class Animable extends TagComponent { }
 class BackgroundTag extends TagComponent { }
 class PlayerTag extends TagComponent { }
 class EnemyTag extends TagComponent { }
@@ -21,20 +21,24 @@ Sprite.schema = {
   height: { type: Types.Number },
   frame: { type: Types.Number },
   collisionOffset: { type: Types.Number },
+  flipImage: { type: Types.Boolean },
 }
 
 class Velocity extends Component { }
 Velocity.schema = {
   x: { type: Types.Number },
-  y: { type: Types.Number }
+  y: { type: Types.Number },
+  maxX: { type: Types.Number },
+  minX: { type: Types.Number },
 }
 
-class PlayerInput extends Component {}
+class PlayerInput extends Component { }
 PlayerInput.schema = {
   key: { type: Types.String },
+  keyCode: { type: Types.String },
 }
 
-class PlayerPhysics extends Component {}
+class PlayerPhysics extends Component { }
 PlayerPhysics.schema = {
   initialPositionY: { type: Types.Number },
   jumpSpeed: { type: Types.Number },
@@ -42,14 +46,16 @@ PlayerPhysics.schema = {
   jumpVariation: { type: Types.Number },
   maxJumpHeight: { type: Types.Number },
   gravity: { type: Types.Number },
-  onGround: { type: Types.Boolean }, 
+  onGround: { type: Types.Boolean },
 }
 
 class Animation extends Component { }
 Animation.schema = {
   current: { type: Types.String },
-  animations: { type: Types.Object },  
-  running: { type: Types.Boolean },
-  idle: { type: Types.String },
-  jump: { type: Types.String }
-};
+  animations: { type: Types.Object },
+}
+
+class GameObject extends Component { }
+GameObject.schema = {
+  enabled: { type: Types.Boolean, default: true },
+}

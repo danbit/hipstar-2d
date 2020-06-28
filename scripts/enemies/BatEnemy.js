@@ -13,16 +13,20 @@ class BatEnemy extends Enemy {
         this.y = y
         this.width = 8
         this.height = 8
+        this.speedX = 4
+        this.speedY = this.type == BatEnemyTypes.ORANGE ? 7 : 5
+        this.maxSpeedX = this.type == BatEnemyTypes.ORANGE ? 8 : 6
+        this.minSpeedX = this.type == BatEnemyTypes.ORANGE ? 6 : 4
         this.updateEntity()
     }
 
     updateEntity() {
         const scale = 2
-        const initialPositionX = this.x || width + 75
+        const initialPositionX = this.x || width + this.width
         const initialPositionY = this.y || height - 100
 
         this.entity.addComponent(Position, { x: initialPositionX, y: initialPositionY })
-            .addComponent(Velocity, { x: 5, y: 0 })
+            .addComponent(Velocity, { x: 0, y: 0, maxX: this.maxSpeedX, minX: this.minSpeedX })
             .addComponent(Animation, {
                 current: "walking",
                 animations: {
