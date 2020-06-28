@@ -10,6 +10,7 @@ class Character {
         const initialPositionY = height - 54
 
         world.createEntity()
+            .addComponent(Collidable)
             .addComponent(PlayerTag)
             .addComponent(Renderable)
             .addComponent(Animable)

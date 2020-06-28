@@ -6,7 +6,8 @@ class Enemy {
     createEntity(world) {
         return world.createEntity()
             .addComponent(EnemyTag)
-            .addComponent(Renderable)
             .addComponent(Animable)
+            .addComponent(Collidable)
     }
+
 }

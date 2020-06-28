@@ -1,3 +1,100 @@
+class AnimationSystem extends System {
+    execute(_delta, _time) {
+        this.queries.entities.results.forEach(entity => {
+            const sprite = entity.getMutableComponent(Sprite)
+            const animation = entity.getMutableComponent(Animation)
+            const currentAnimation = animation.animations[animation.current]
+
+            sprite.frame++
+            if (sprite.frame >= currentAnimation.totalFrames) {
+                sprite.frame = 0
+            }
+        })
+    }
+}
+AnimationSystem.queries = {
+    entities: { components: [Animable] },
+}
+
+class CollisionSystem extends System {
+    execute(_delta, _time) {
+        if (window.disableAllCollisions) {
+            return
+        }
+        const player = this.queries.player.results[0]
+        this.queries.enimies.results.forEach(enemy => {
+            if (this.isColliding(player, enemy)) {
+                this.gameOver()
+            }
+        })
+    }
+
+    gameOver() {
+        background('rgba(0%,0%,0%,.80)')
+        fill("#cc0000")
+        game.soundtrack.stop()
+        textAlign(CENTER)
+        textSize(48)
+        text("Game Over", width / 2, height / 2)
+        isGameOver = true
+        noLoop()
+    }
+
+    isColliding(player, enemy) {
+        const playerSprite = player.getComponent(Sprite)
+        const playerPosition = player.getComponent(Position)
+        const enemySprite = enemy.getComponent(Sprite)
+        const enamyPosition = enemy.getComponent(Position)
+
+        const colliding = collideRectRect(
+            playerPosition.x,
+            playerPosition.y,
+            playerSprite.width * playerSprite.collisionOffset,
+            playerSprite.height * playerSprite.collisionOffset,
+            enamyPosition.x,
+            enamyPosition.y,
+            enemySprite.width * enemySprite.collisionOffset,
+            enemySprite.height * enemySprite.collisionOffset,
+        )
+        return colliding
+    }
+}
+CollisionSystem.queries = {
+    player: { components: [Collidable, PlayerTag] },
+    enimies: { components: [Collidable, EnemyTag] },
+}
+
+class HorizontalMovementSystem extends System {
+    execute(_delta, _time) {
+        this.queries.entities.results.forEach(entity => {
+            const position = entity.getMutableComponent(Position)
+            const velocity = entity.getComponent(Velocity)
+
+            position.x -= velocity.x
+            if (position.x < -width) {
+                position.x = width
+            }
+        })
+
+        this.queries.enemies.results.forEach(entity => {
+            const position = entity.getMutableComponent(Position)
+            const velocity = entity.getMutableComponent(Velocity)
+            const sprite = entity.getComponent(Sprite)
+
+            position.x -= velocity.x
+            if (position.x < -sprite.width * 2) {
+                entity.removeComponent(Renderable)
+                velocity.x = 0
+                position.x = width + sprite.width
+            }
+        })
+    }
+}
+HorizontalMovementSystem.queries = {
+    entities: { components: [Position, Velocity] },
+    enemies: { components: [EnemyTag, Position, Velocity] },
+}
+
 class SpriteRendererSystem extends System {
     // This method will get called on every frame by default
     execute(_delta, _time) {
@@ -52,55 +149,6 @@ class SpriteRendererSystem extends System {
 // Define a query of entities that have "Renderable" and "Sprite" components
 SpriteRendererSystem.queries = {
     renderables: { components: [Renderable, Sprite] }
-}
-
-class HorizontalMovementSystem extends System {
-    execute(_delta, _time) {
-        this.queries.entities.results.forEach(entity => {
-            const position = entity.getMutableComponent(Position)
-            const velocity = entity.getComponent(Velocity)
-
-            position.x -= velocity.x
-
-            if (position.x < -width) {
-                position.x = width
-            }
-        })
-
-        // let nextBackgroundIndex = 1
-        const backgrounds = this.queries.backgrounds.results
-
-        for (let i = 0; i < backgrounds.length; i++) {
-            const backgroundEntity = backgrounds[i]
-            const position = backgroundEntity.getMutableComponent(Position)
-            const velocity = backgroundEntity.getComponent(Velocity)
-
-            position.x -= velocity.x
-
-            if (position.x <= -width) {
-                position.x = width
-            }
-
-            // const nextBackgroundEntity = backgrounds[nextBackgroundIndex]
-            // const nextBackgroundPosition = nextBackgroundEntity.getMutableComponent(Position)
-
-
-            // if (nextBackgroundPosition.x <= -width) {
-            //     nextBackgroundPosition.x = width + position.x
-            // }
-
-            // console.log('nextBackground', nextBackgroundIndex)
-
-            // nextBackgroundIndex++
-            // if (nextBackgroundIndex >= backgrounds.length) {
-            //     nextBackgroundIndex = 0
-            // }
-        }
-    }
-}
-HorizontalMovementSystem.queries = {
-    entities: { components: [Not(BackgroundTag), Position, Velocity] },
-    backgrounds: { components: [BackgroundTag, Position, Velocity] },
 }
 
 class PlayerMovementSystem extends System {
@@ -174,68 +222,30 @@ PlayerMovementSystem.queries = {
     inputs: { components: [PlayerInput] },
 }
 
-class AnimationSystem extends System {
+class EnemyWaveSystem extends System {
     execute(_delta, _time) {
-        this.queries.entities.results.forEach(entity => {
-            const sprite = entity.getMutableComponent(Sprite)
-            const animation = entity.getMutableComponent(Animation)
-            const currentAnimation = animation.animations[animation.current]
+        this.queries.entities.removed.forEach(entity => {
+            const enemyEntity = this.randomEnemy()
+            enemyEntity.addComponent(Renderable)
 
-            sprite.frame++
-            if (sprite.frame >= currentAnimation.totalFrames) {
-                sprite.frame = 0
-            }
+            const velocity = enemyEntity.getMutableComponent(Velocity)
+            velocity.x = this.randomSpeedX(velocity)
         })
     }
-}
-AnimationSystem.queries = {
-    entities: { components: [Animable] },
-}
+    randomEnemy() {
+        const enemies = this.world.entityManager.queryComponents([EnemyTag]).entities
+        return enemies[Math.floor(random(0, enemies.length))];
+    }
 
-class CollisionSystem extends System {
-    execute(_delta, _time) {
-        if (window.disableAllCollisions) {
-            return
+    randomSpeedX(velocity){
+        return math.random(velocity.minX, velocity.maxX)
+    }
+}
+EnemyWaveSystem.queries = {
+    entities: {
+        components: [EnemyTag, Renderable],
+        listen: {
+            removed: true,
         }
-        const player = this.queries.player.results[0]
-        this.queries.enimies.results.forEach(enemy => {
-            if (this.isColliding(player, enemy)) {
-                this.gameOver()
-            }
-        })
-    }
-
-    gameOver() {
-        background('rgba(0%,0%,0%,.80)')
-        fill("#cc0000")
-        game.soundtrack.stop()
-        textAlign(CENTER)
-        textSize(48)
-        text("Game Over", width / 2, height / 2)
-        isGameOver = true
-        noLoop()
-    }
-
-    isColliding(player, enemy) {
-        const playerSprite = player.getComponent(Sprite)
-        const playerPosition = player.getComponent(Position)
-        const enemySprite = enemy.getComponent(Sprite)
-        const enamyPosition = enemy.getComponent(Position)
-
-        const colliding = collideRectRect(
-            playerPosition.x,
-            playerPosition.y,
-            playerSprite.width * playerSprite.collisionOffset,
-            playerSprite.height * playerSprite.collisionOffset,
-            enamyPosition.x,
-            enamyPosition.y,
-            enemySprite.width * enemySprite.collisionOffset,
-            enemySprite.height * enemySprite.collisionOffset,
-        )
-        return colliding
-    }
-}
-CollisionSystem.queries = {
-    player: { components: [PlayerTag, Position, Sprite] },
-    enimies: { components: [EnemyTag, Position, Sprite] },
+    },
 }

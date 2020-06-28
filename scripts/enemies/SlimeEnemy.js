@@ -6,16 +6,18 @@ class SlimeEnemy extends Enemy {
         this.y = y
         this.width = 16
         this.height = 23
+        this.maxSpeedX = 4
+        this.minSpeedX= 5
         this.updateEntity()
     }
 
     updateEntity() {
         const scale = 2
-        const initialPositionX = this.x || width + 16
+        const initialPositionX = this.x || width + this.width
         const initialPositionY = this.y || height - 64
 
         this.entity.addComponent(Position, { x: initialPositionX, y: initialPositionY })
-            .addComponent(Velocity, { x: 5, y: 0 })
+            .addComponent(Velocity, { x: 0, y: 0, maxX: this.maxSpeedX, minX: this.minSpeedX })
             .addComponent(Animation, {
                 current: "walking",
                 animations: {

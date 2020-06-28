@@ -1,5 +1,5 @@
-const game = new Game()
-window.disableAllCollisions = true
+const game = new GameController()
+window.disableAllCollisions = false
 
 let isGameOver
 
@@ -9,7 +9,7 @@ preload = () => {
 
 setup = () => {
   createCanvas(640, 360)
-  frameRate(40)
+  frameRate(30)
   game.onStart()
 }
 
