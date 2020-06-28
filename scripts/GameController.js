@@ -11,6 +11,10 @@ class GameController {
         this.imageEnemyMushroom = loadImage('assets/sprites/enemies/mushroom_spritesheet.png')
         this.imageEnemyGoblin = loadImage('assets/sprites/enemies/goblin_spritesheet.png')
         this.imageEnemyBats = loadImage('assets/sprites/enemies/bat_fly_spritesheet.png')
+        this.imageHeartHud = loadImage('assets/sprites/hud/hearts_hud.png')
+        this.imageNoHeartHud = loadImage('assets/sprites/hud/no_hearts_hud.png')
+        this.imageLostHeartsHud = loadImage('assets/sprites/hud/lost_hearts_anim_strip_5.png')
+        
         this.soundtrack = loadSound('assets/sounds/trilha_jogo.mp3')
         this.jumpSound = loadSound('assets/sounds/sound_jump.mp3')
     }
@@ -21,6 +25,7 @@ class GameController {
             .registerComponent(BackgroundTag)
             .registerComponent(PlayerTag)
             .registerComponent(EnemyTag)
+            .registerComponent(HudTag)
             .registerComponent(Position)
             .registerComponent(Sprite)
             .registerComponent(Velocity)
@@ -30,12 +35,22 @@ class GameController {
             .registerComponent(PlayerInput)
             .registerComponent(PlayerPhysics)
             .registerComponent(Animation)
+            .registerComponent(Score)
+            .registerComponent(GameState)
+            .registerComponent(Health)
             .registerSystem(SpriteRendererSystem)
             .registerSystem(HorizontalMovementSystem)
             .registerSystem(AnimationSystem)
             .registerSystem(PlayerMovementSystem)
             .registerSystem(CollisionSystem)
             .registerSystem(EnemyWaveSystem)
+            .registerSystem(ScoreSystem)
+            .registerSystem(GUISystem)
+            .registerSystem(HealthSystem)
+
+        this.gameEntity = this.world.createEntity()
+            .addComponent(GameState, { isRunning: true })
+            .addComponent(Score, { value: 0 })
 
         this.background = new Background([
             this.imageForestLayer01,
@@ -45,6 +60,7 @@ class GameController {
             this.imageForestLayer05],
             this.world)
         this.player = new Character(this.imageCharSprite, this.world)
+        this.hearth = new HeartHud(this.imageHeartHud, this.imageNoHeartHud, this.imageLostHeartsHud, this.world)
 
         const worm = new WormEnemy(this.imageEnemyWorm, this.world)
         const slime = new SlimeEnemy(this.imageEnemySlime, this.world)
@@ -52,7 +68,7 @@ class GameController {
         const batBlue = new BatEnemy(this.imageEnemyBats, this.world)
         const batOrange = new BatEnemy(this.imageEnemyBats, this.world, BatEnemyTypes.ORANGE)
         const goblin = new GoblinEnemy(this.imageEnemyGoblin, this.world)
-        
+
         this.enemies = []
         this.enemies.push(worm)
         this.enemies.push(slime)
@@ -72,10 +88,10 @@ class GameController {
 
     onInput(type, key, keyCode) {
         if (type === 'keyPressed') {
-            if (isGameOver) {
+            if (this.gameEntity.getComponent(GameState).gameOver) {
                 window.location.reload()
             }
-            this.world.createEntity().addComponent(PlayerInput, { key, keyCode })
+            this.gameEntity.addComponent(PlayerInput, { key, keyCode })
         }
     }
 }

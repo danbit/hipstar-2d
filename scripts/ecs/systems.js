@@ -1,5 +1,7 @@
 class AnimationSystem extends System {
     execute(_delta, _time) {
+        const gameEntity = this.queries.game.results[0]
+        
         this.queries.entities.results.forEach(entity => {
             const sprite = entity.getMutableComponent(Sprite)
             const animation = entity.getMutableComponent(Animation)
@@ -11,12 +13,19 @@ class AnimationSystem extends System {
                 if (sprite.frame >= currentAnimation.totalFrames) {
                     sprite.frame = 0
                     animation.cycles = 0
+
+                    if (animation.current === 'death') {
+                        const gameState = gameEntity.getMutableComponent(GameState)                        
+                        gameState.gameOver = true
+                        console.log('death animation')
+                    }
                 }
             }
         })
     }
 }
 AnimationSystem.queries = {
+    game: { components: [GameState] },
     entities: { components: [Animable] },
 }
 
@@ -25,30 +34,42 @@ class CollisionSystem extends System {
         if (window.disableAllCollisions) {
             return
         }
-        const player = this.queries.player.results[0]
-        this.queries.enimies.results.forEach(enemy => {
-            if (this.isColliding(player, enemy)) {
-                this.gameOver()
+        const gameEntity = this.queries.game.results[0]
+        const playerEntity = this.queries.player.results[0]
+
+        if (!playerEntity.getComponent(PlayerPhysics).collisionEnabled) {
+            return
+        }
+
+        this.queries.enimies.results.forEach(enemyEntity => {
+            if (this.isColliding(playerEntity, enemyEntity)) {
+                const health = playerEntity.getMutableComponent(Health)
+                // TODO center all animations on AnimationSystem
+                const animation = playerEntity.getMutableComponent(Animation)
+                const physics = playerEntity.getComponent(PlayerPhysics)
+
+                health.value -= 1
+                if (health.value <= 0) {
+                    const gameState = gameEntity.getMutableComponent(GameState)
+                    physics.collisionEnabled = false
+                    console.log('playerIsDead')
+                    gameState.playerIsDead = true
+                } else {
+                    physics.collisionEnabled = false
+                    setTimeout(() => {
+                        physics.collisionEnabled = true
+                        animation.current = 'running'
+                    }, 1000);
+                }
             }
         })
     }
 
-    gameOver() {
-        background('rgba(0%,0%,0%,.80)')
-        fill("#cc0000")
-        game.soundtrack.stop()
-        textAlign(CENTER)
-        textSize(36)
-        text("Game Over", width / 2, height / 2)
-        isGameOver = true
-        noLoop()
-    }
-
-    isColliding(player, enemy) {
-        const playerSprite = player.getComponent(Sprite)
-        const playerPosition = player.getComponent(Position)
-        const enemySprite = enemy.getComponent(Sprite)
-        const enamyPosition = enemy.getComponent(Position)
+    isColliding(playerEntity, enemyEntity) {
+        const playerSprite = playerEntity.getComponent(Sprite)
+        const playerPosition = playerEntity.getComponent(Position)
+        const enemySprite = enemyEntity.getComponent(Sprite)
+        const enamyPosition = enemyEntity.getComponent(Position)
 
         const colliding = collideRectRect(
             playerPosition.x,
@@ -64,6 +85,7 @@ class CollisionSystem extends System {
     }
 }
 CollisionSystem.queries = {
+    game: { components: [GameState] },
     player: { components: [Collidable, PlayerTag] },
     enimies: { components: [Collidable, EnemyTag] },
 }
@@ -117,8 +139,8 @@ class SpriteRendererSystem extends System {
             let positionX = position.x
 
             if (sprite.flipImage) {
-                push(); //save current "default" matrix
-                scale(-1, 1); //scale the matrix
+                push() //save current "default" matrix
+                scale(-1, 1) //scale the matrix
                 positionX = -position.x - sprite.width
             }
             image(
@@ -133,7 +155,7 @@ class SpriteRendererSystem extends System {
                 sprite.imageHeight
             )
             if (sprite.flipImage) {
-                pop();
+                pop()
             }
         } else {
             image(
@@ -167,6 +189,9 @@ class PlayerMovementSystem extends System {
             entity.removeComponent(PlayerInput, true)
         })
 
+        const gameEntity = this.queries.game.results[0]
+        this.gameState = gameEntity.getComponent(GameState)
+
         const playerEntity = this.queries.player.results[0]
         if (!playerEntity) return
 
@@ -184,8 +209,7 @@ class PlayerMovementSystem extends System {
     }
 
     jump() {
-
-        if (this.physics.jumpAmount > 0) {
+        if (this.physics.jumpAmount > 0 && !this.gameState.gameOver) {
             game.jumpSound.play()
             this.animation.current = 'jumpingUp'
             this.physics.jumpSpeed = - this.physics.jumpVariation
@@ -207,6 +231,15 @@ class PlayerMovementSystem extends System {
         const onGround = this.position.y === this.physics.initialPositionY
         const jumpingUp = this.animation.current === 'jumpingUp'
 
+        if (!this.physics.collisionEnabled && !this.gameState.playerIsDead) {
+            this.animation.current = 'hurting'
+            return
+        } else if (!this.physics.collisionEnabled && this.gameState.playerIsDead) {
+            this.animation.current = 'death'
+            frameRate(10)
+            return
+        }
+
         if (onGround && !jumpingUp) {
             this.animation.current = 'running'
             this.physics.onGround = true
@@ -222,6 +255,7 @@ class PlayerMovementSystem extends System {
     }
 }
 PlayerMovementSystem.queries = {
+    game: { components: [GameState] },
     player: { components: [PlayerTag, Position, PlayerPhysics] },
     inputs: { components: [PlayerInput] },
 }
@@ -238,7 +272,7 @@ class EnemyWaveSystem extends System {
     }
     randomEnemy() {
         const enemies = this.world.entityManager.queryComponents([EnemyTag]).entities
-        return enemies[Math.floor(random(0, enemies.length))];
+        return enemies[Math.floor(random(0, enemies.length))]
     }
 
     randomSpeedX(velocity) {
@@ -253,3 +287,89 @@ EnemyWaveSystem.queries = {
         }
     },
 }
+
+class ScoreSystem extends System {
+    execute(_delta, _time) {
+        const gameQuery = this.queries.game
+
+        let gameEntity = gameQuery.results[0]
+        const gameState = gameEntity.getComponent(GameState)
+        const score = gameEntity.getMutableComponent(Score)
+
+        if (gameState.isRunning) {
+            score.value += 0.2
+        }
+    }
+}
+ScoreSystem.queries = {
+    game: {
+        components: [GameState, Score],
+    }
+}
+
+class GUISystem extends System {
+    execute(_delta, _time) {
+        this.queries.game.changed.forEach(entity => {
+            const gameState = entity.getComponent(GameState)
+            if (gameState.gameOver) {
+                this.renderGameOverScreen()
+            }
+        })
+
+        this.queries.score.changed.forEach(entity => {
+            const score = entity.getComponent(Score)
+            this.renderScore(score)
+        })
+    }
+
+    renderHealth() {
+
+    }
+
+    renderScore(score) {
+        textAlign(RIGHT)
+        fill('#FFF')
+        textSize(24)
+        text(parseInt(score.value), width - 10, 30)
+    }
+
+    renderGameOverScreen() {
+        background('rgba(0%,0%,0%,.80)')
+        fill("#cc0000")
+        game.soundtrack.stop() // TODO create sound system
+        textAlign(CENTER)
+        textSize(36)
+        text("Game Over", width / 2, height / 2)
+        noLoop()
+    }
+}
+GUISystem.queries = {
+    game: {
+        components: [GameState],
+        listen: {
+            changed: [GameState]
+        }
+    },
+    score: {
+        components: [Score],
+        listen: {
+            changed: [Score]
+        }
+    }
+}
+
+class HealthSystem extends System {
+    execute(_delta, _time) {
+        this.queries.entities.results.forEach(entity => {
+        })
+    }
+}
+HealthSystem.queries = {
+    entities: {
+        components: [Health],
+        listen: {
+            changed: [Health]
+        }
+    }
+}
+
