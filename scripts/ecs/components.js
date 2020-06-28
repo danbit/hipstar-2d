@@ -4,6 +4,7 @@ class Animable extends TagComponent { }
 class BackgroundTag extends TagComponent { }
 class PlayerTag extends TagComponent { }
 class EnemyTag extends TagComponent { }
+class HudTag extends TagComponent { }
 
 class Position extends Component { }
 Position.schema = {
@@ -47,6 +48,7 @@ PlayerPhysics.schema = {
   maxJumpHeight: { type: Types.Number },
   gravity: { type: Types.Number },
   onGround: { type: Types.Boolean },
+  collisionEnabled: { type: Types.Boolean, default: true },
 }
 
 class Animation extends Component { }
@@ -61,9 +63,16 @@ class GameState extends Component { }
 GameState.schema = {
   isRunning: { type: Types.Boolean },
   gameOver: { type: Types.Boolean },
+  playerIsDead: { type: Types.Boolean },
 }
 
 class Score extends Component { }
 Score.schema = {
   value: { type: Types.Boolean },
+}
+
+class Health extends Component { }
+Health.schema = {
+  value: { type: Types.Boolean },
+  image: { type: Types.Object },
 }

@@ -1,11 +1,12 @@
 class Character {
     constructor(characterImage, world) {
         this.characterImage = characterImage
-        this.scale = 2;
-        this.createEntities(world)
+        this.scale = 2
+        this.health = 3
+        this.createEntity(world)
     }
 
-    createEntities(world) {
+    createEntity(world) {
         const initialPositionX = 16
         const initialPositionY = height - 54
 
@@ -14,28 +15,37 @@ class Character {
             .addComponent(PlayerTag)
             .addComponent(Renderable)
             .addComponent(Animable)
+            .addComponent(Health, { value: this.health })
             .addComponent(Position, { x: initialPositionX, y: initialPositionY })
             .addComponent(Animation, {
                 current: "running",
                 animations: {
-                    idle: {
-                        row: 4,
-                        totalFrames: 4
-                    },
+                    death: {
+                        row: 0,
+                        totalFrames: 8
+                    },  
                     running: {
                         row: 1,
                         totalFrames: 6
                     },
-                    jumpingUp: {
-                        row: 6,
-                        totalFrames: 3
+                    idle: {
+                        row: 4,
+                        totalFrames: 4
                     },
                     jumpingDown: {
                         row: 5,
                         totalFrames: 3
                     },
+                    jumpingUp: {
+                        row: 6,
+                        totalFrames: 3
+                    },
                     doubleJumping: {
                         row: 8,
+                        totalFrames: 3
+                    },
+                    hurting: {
+                        row: 9,
                         totalFrames: 3
                     }
                 },
@@ -48,7 +58,8 @@ class Character {
                 jumpAmount: 2,
                 jumpVariation: 16,
                 maxJumpHeight: 255,
-                gravity: 3
+                gravity: 3,
+                collisionEnabled: true
             })
             .addComponent(Sprite, {
                 image: this.characterImage,

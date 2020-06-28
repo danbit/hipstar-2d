@@ -11,6 +11,10 @@ class GameController {
         this.imageEnemyMushroom = loadImage('assets/sprites/enemies/mushroom_spritesheet.png')
         this.imageEnemyGoblin = loadImage('assets/sprites/enemies/goblin_spritesheet.png')
         this.imageEnemyBats = loadImage('assets/sprites/enemies/bat_fly_spritesheet.png')
+        this.imageHeartHud = loadImage('assets/sprites/hud/hearts_hud.png')
+        this.imageNoHeartHud = loadImage('assets/sprites/hud/no_hearts_hud.png')
+        this.imageLostHeartsHud = loadImage('assets/sprites/hud/lost_hearts_anim_strip_5.png')
+        
         this.soundtrack = loadSound('assets/sounds/trilha_jogo.mp3')
         this.jumpSound = loadSound('assets/sounds/sound_jump.mp3')
     }
@@ -21,6 +25,7 @@ class GameController {
             .registerComponent(BackgroundTag)
             .registerComponent(PlayerTag)
             .registerComponent(EnemyTag)
+            .registerComponent(HudTag)
             .registerComponent(Position)
             .registerComponent(Sprite)
             .registerComponent(Velocity)
@@ -32,6 +37,7 @@ class GameController {
             .registerComponent(Animation)
             .registerComponent(Score)
             .registerComponent(GameState)
+            .registerComponent(Health)
             .registerSystem(SpriteRendererSystem)
             .registerSystem(HorizontalMovementSystem)
             .registerSystem(AnimationSystem)
@@ -40,6 +46,7 @@ class GameController {
             .registerSystem(EnemyWaveSystem)
             .registerSystem(ScoreSystem)
             .registerSystem(GUISystem)
+            .registerSystem(HealthSystem)
 
         this.gameEntity = this.world.createEntity()
             .addComponent(GameState, { isRunning: true })
@@ -53,6 +60,7 @@ class GameController {
             this.imageForestLayer05],
             this.world)
         this.player = new Character(this.imageCharSprite, this.world)
+        this.hearth = new HeartHud(this.imageHeartHud, this.imageNoHeartHud, this.imageLostHeartsHud, this.world)
 
         const worm = new WormEnemy(this.imageEnemyWorm, this.world)
         const slime = new SlimeEnemy(this.imageEnemySlime, this.world)
