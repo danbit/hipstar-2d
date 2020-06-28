@@ -21,7 +21,7 @@ Sprite.schema = {
   height: { type: Types.Number },
   frame: { type: Types.Number },
   collisionOffset: { type: Types.Number },
-  flipImage: { type: Types.Boolean },
+  flipImage: { type: Types.Boolean },  
 }
 
 class Velocity extends Component { }
@@ -53,6 +53,8 @@ class Animation extends Component { }
 Animation.schema = {
   current: { type: Types.String },
   animations: { type: Types.Object },
+  cycles: { type: Types.Number },
+  frameDelay: { type: Types.Number },
 }
 
 class GameObject extends Component { }

@@ -7,11 +7,8 @@ class EnemyController {
 
     initWave() {
         const enemy = this.randomEnemy()
-        console.log('enemy', enemy)
         enemy.entity.addComponent(Renderable)
         enemy.entity.getComponent(Velocity).x = this.randomSpeedX(enemy)
-
-        console.log('enemy.entity.getComponent(Velocity).x', enemy.entity.getComponent(Velocity).x)
     }
 
     randomEnemy() {

@@ -38,7 +38,9 @@ class Character {
                         row: 8,
                         totalFrames: 3
                     }
-                }
+                },
+                cycles: 0,
+                frameDelay: 2
             })
             .addComponent(PlayerPhysics, {
                 initialPositionY,

@@ -6,8 +6,8 @@ class GoblinEnemy extends Enemy {
         this.y = y
         this.width = 16
         this.height = 16
-        this.maxSpeedX = 4
-        this.minSpeedX = 5
+        this.maxSpeedX = 5
+        this.minSpeedX = 6
         this.updateEntity()
     }
 
@@ -23,9 +23,11 @@ class GoblinEnemy extends Enemy {
                 animations: {
                     walking: {
                         row: 0,
-                        totalFrames: 6
+                        totalFrames: 3
                     }
-                }
+                },
+                cycles: 0,
+                frameDelay: 3
             })
             .addComponent(Sprite, {
                 image: this.enemyImage,
