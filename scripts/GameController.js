@@ -25,7 +25,7 @@ class GameController {
             .registerComponent(BackgroundTag)
             .registerComponent(PlayerTag)
             .registerComponent(EnemyTag)
-            .registerComponent(HudTag)
+            .registerComponent(HealthHudTag)
             .registerComponent(Position)
             .registerComponent(Sprite)
             .registerComponent(Velocity)

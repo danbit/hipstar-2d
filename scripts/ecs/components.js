@@ -4,7 +4,7 @@ class Animable extends TagComponent { }
 class BackgroundTag extends TagComponent { }
 class PlayerTag extends TagComponent { }
 class EnemyTag extends TagComponent { }
-class HudTag extends TagComponent { }
+class HealthHudTag extends TagComponent { }
 
 class Position extends Component { }
 Position.schema = {
@@ -15,6 +15,7 @@ Position.schema = {
 class Sprite extends Component { }
 Sprite.schema = {
   image: { type: Types.Object },
+  imagesAux: { type: Types.Object },
   imageWidth: { type: Types.Number },
   imageHeight: { type: Types.Number },
   isSpriteSheet: { type: Types.Boolean },

@@ -1,7 +1,7 @@
 class AnimationSystem extends System {
     execute(_delta, _time) {
         const gameEntity = this.queries.game.results[0]
-        
+
         this.queries.entities.results.forEach(entity => {
             const sprite = entity.getMutableComponent(Sprite)
             const animation = entity.getMutableComponent(Animation)
@@ -15,13 +15,20 @@ class AnimationSystem extends System {
                     animation.cycles = 0
 
                     if (animation.current === 'death') {
-                        const gameState = gameEntity.getMutableComponent(GameState)                        
+                        const gameState = gameEntity.getMutableComponent(GameState)
                         gameState.gameOver = true
-                        console.log('death animation')
+                    }else if (animation.current === 'disapearing') {
+                        this.changedHearthSprite(entity)
                     }
                 }
             }
         })
+    }
+
+    changedHearthSprite(healthHudEntity){
+        const sprite = healthHudEntity.getMutableComponent(Sprite)
+        sprite.image = sprite.imagesAux.noHeart
+        sprite.isSpriteSheet = false
     }
 }
 AnimationSystem.queries = {
@@ -52,7 +59,6 @@ class CollisionSystem extends System {
                 if (health.value <= 0) {
                     const gameState = gameEntity.getMutableComponent(GameState)
                     physics.collisionEnabled = false
-                    console.log('playerIsDead')
                     gameState.playerIsDead = true
                 } else {
                     physics.collisionEnabled = false
@@ -355,16 +361,50 @@ GUISystem.queries = {
         listen: {
             changed: [Score]
         }
+    },
+    health: {
+        components: [HealthHudTag],
+        listen: {
+            removed: true
+        }
     }
 }
 
 class HealthSystem extends System {
     execute(_delta, _time) {
-        this.queries.entities.results.forEach(entity => {
+        const healthHudEntities = this.queries.healthHud.results
+
+        this.queries.entities.changed.forEach(entity => {
+            const health = entity.getComponent(Health)
+            this.removeHealth(healthHudEntities, health)
         })
+    }
+
+    removeHealth(healthHudEntities, health) {
+        const healthHudEntity = healthHudEntities[health.value]
+        const sprite = healthHudEntity.getMutableComponent(Sprite)
+        sprite.image = sprite.imagesAux.lostHeart
+        sprite.isSpriteSheet = true
+
+        healthHudEntity
+            .addComponent(Animable)
+            .addComponent(Animation, {
+                current: "disapearing",
+                animations: {
+                    disapearing: {
+                        row: 0,
+                        totalFrames: 5
+                    }
+                },
+                cycles: 0,
+                frameDelay: 2
+            })
     }
 }
 HealthSystem.queries = {
+    healthHud: {
+        components: [HealthHudTag]
+    },
     entities: {
         components: [Health],
         listen: {
