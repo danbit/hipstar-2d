@@ -6,8 +6,8 @@ class SlimeEnemy extends Enemy {
         this.y = y
         this.width = 16
         this.height = 23
-        this.maxSpeedX = 4
-        this.minSpeedX= 5
+        this.maxSpeedX = 5
+        this.minSpeedX= 7
         this.updateEntity()
     }
 

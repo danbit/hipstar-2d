@@ -14,6 +14,7 @@ class GameController {
         this.imageHeartHud = loadImage('assets/sprites/hud/hearts_hud.png')
         this.imageNoHeartHud = loadImage('assets/sprites/hud/no_hearts_hud.png')
         this.imageLostHeartsHud = loadImage('assets/sprites/hud/lost_hearts_anim_strip_5.png')
+        this.imageCoinHud = loadImage('assets/sprites/hud/coins_hud.png')
         
         this.soundtrack = loadSound('assets/sounds/trilha_jogo.mp3')
         this.jumpSound = loadSound('assets/sounds/sound_jump.mp3')
@@ -38,6 +39,7 @@ class GameController {
             .registerComponent(Score)
             .registerComponent(GameState)
             .registerComponent(Health)
+            .registerComponent(Colletable)
             .registerSystem(SpriteRendererSystem)
             .registerSystem(HorizontalMovementSystem)
             .registerSystem(AnimationSystem)
@@ -47,6 +49,7 @@ class GameController {
             .registerSystem(ScoreSystem)
             .registerSystem(GUISystem)
             .registerSystem(HealthSystem)
+            .registerSystem(ItemSystem)
 
         this.gameEntity = this.world.createEntity()
             .addComponent(GameState, { isRunning: true })
@@ -61,6 +64,7 @@ class GameController {
             this.world)
         this.player = new Character(this.imageCharSprite, this.world)
         this.hearth = new HeartHud(this.imageHeartHud, this.imageNoHeartHud, this.imageLostHeartsHud, this.world)
+        this.coin =  new Coin(this.imageCoinHud, this.world)   
 
         const worm = new WormEnemy(this.imageEnemyWorm, this.world)
         const slime = new SlimeEnemy(this.imageEnemySlime, this.world)

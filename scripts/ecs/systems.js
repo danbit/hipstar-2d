@@ -17,7 +17,7 @@ class AnimationSystem extends System {
                     if (animation.current === 'death') {
                         const gameState = gameEntity.getMutableComponent(GameState)
                         gameState.gameOver = true
-                    }else if (animation.current === 'disapearing') {
+                    } else if (animation.current === 'disapearing') {
                         this.changedHearthSprite(entity)
                     }
                 }
@@ -25,7 +25,7 @@ class AnimationSystem extends System {
         })
     }
 
-    changedHearthSprite(healthHudEntity){
+    changedHearthSprite(healthHudEntity) {
         const sprite = healthHudEntity.getMutableComponent(Sprite)
         sprite.image = sprite.imagesAux.noHeart
         sprite.isSpriteSheet = false
@@ -47,6 +47,21 @@ class CollisionSystem extends System {
         if (!playerEntity.getComponent(PlayerPhysics).collisionEnabled) {
             return
         }
+
+        this.queries.items.results.forEach(itemEntity => {
+            if (this.isColliding(playerEntity, itemEntity)) {
+                const sprite = itemEntity.getComponent(Sprite)
+                const position = itemEntity.getMutableComponent(Position)
+                position.x = width + sprite.width
+
+                const itemScore = itemEntity.getComponent(Score)
+                itemEntity.removeComponent(Collidable)
+                itemEntity.removeComponent(Renderable)
+
+                const score = gameEntity.getMutableComponent(Score)
+                score.value += itemScore.value
+            }
+        })
 
         this.queries.enimies.results.forEach(enemyEntity => {
             if (this.isColliding(playerEntity, enemyEntity)) {
@@ -71,21 +86,22 @@ class CollisionSystem extends System {
         })
     }
 
-    isColliding(playerEntity, enemyEntity) {
+    isColliding(playerEntity, entity) {
         const playerSprite = playerEntity.getComponent(Sprite)
         const playerPosition = playerEntity.getComponent(Position)
-        const enemySprite = enemyEntity.getComponent(Sprite)
-        const enamyPosition = enemyEntity.getComponent(Position)
+        const otherSprite = entity.getComponent(Sprite)
+        const otherPosition = entity.getComponent(Position)
+        const collisionOffset = otherSprite.isSpriteSheet ? otherSprite.collisionOffset : 1
 
         const colliding = collideRectRect(
             playerPosition.x,
             playerPosition.y,
             playerSprite.width * playerSprite.collisionOffset,
             playerSprite.height * playerSprite.collisionOffset,
-            enamyPosition.x,
-            enamyPosition.y,
-            enemySprite.width * enemySprite.collisionOffset,
-            enemySprite.height * enemySprite.collisionOffset,
+            otherPosition.x,
+            otherPosition.y,
+            otherSprite.width * collisionOffset,
+            otherSprite.height * collisionOffset,
         )
         return colliding
     }
@@ -94,11 +110,12 @@ CollisionSystem.queries = {
     game: { components: [GameState] },
     player: { components: [Collidable, PlayerTag] },
     enimies: { components: [Collidable, EnemyTag] },
+    items: { components: [Collidable, Colletable] },
 }
 
 class HorizontalMovementSystem extends System {
     execute(_delta, _time) {
-        this.queries.entities.results.forEach(entity => {
+        this.queries.backgrounds.results.forEach(entity => {
             const position = entity.getMutableComponent(Position)
             const velocity = entity.getComponent(Velocity)
 
@@ -108,7 +125,7 @@ class HorizontalMovementSystem extends System {
             }
         })
 
-        this.queries.enemies.results.forEach(entity => {
+        this.queries.entities.results.forEach(entity => {
             const position = entity.getMutableComponent(Position)
             const velocity = entity.getMutableComponent(Velocity)
             const sprite = entity.getComponent(Sprite)
@@ -123,8 +140,8 @@ class HorizontalMovementSystem extends System {
     }
 }
 HorizontalMovementSystem.queries = {
-    entities: { components: [Position, Velocity] },
-    enemies: { components: [EnemyTag, Position, Velocity] },
+    entities: { components: [Not(BackgroundTag), Renderable, Position, Velocity] },
+    backgrounds: { components: [BackgroundTag, Renderable, Position, Velocity] },
 }
 
 class SpriteRendererSystem extends System {
@@ -296,9 +313,7 @@ EnemyWaveSystem.queries = {
 
 class ScoreSystem extends System {
     execute(_delta, _time) {
-        const gameQuery = this.queries.game
-
-        let gameEntity = gameQuery.results[0]
+        let gameEntity = this.queries.game.results[0]
         const gameState = gameEntity.getComponent(GameState)
         const score = gameEntity.getMutableComponent(Score)
 
@@ -309,7 +324,7 @@ class ScoreSystem extends System {
 }
 ScoreSystem.queries = {
     game: {
-        components: [GameState, Score],
+        components: [GameState, Score, Not(Colletable)],
     }
 }
 
@@ -326,10 +341,6 @@ class GUISystem extends System {
             const score = entity.getComponent(Score)
             this.renderScore(score)
         })
-    }
-
-    renderHealth() {
-
     }
 
     renderScore(score) {
@@ -357,7 +368,7 @@ GUISystem.queries = {
         }
     },
     score: {
-        components: [Score],
+        components: [Score, Not(Colletable)],
         listen: {
             changed: [Score]
         }
@@ -413,3 +424,38 @@ HealthSystem.queries = {
     }
 }
 
+class ItemSystem extends System {
+    execute(_delta, _time) {
+        this.queries.entities.removed.forEach(entity => {
+            setTimeout(() => this.recycleItem(entity), math.random(500, 2000))
+        })
+    }
+
+    recycleItem(entity) {
+        const velocity = entity.getMutableComponent(Velocity)
+        const position = entity.getMutableComponent(Position)
+        velocity.x = this.randomSpeedX(velocity)
+        position.y = this.randomPositionY()
+
+        entity.addComponent(Renderable)
+        if (!entity.hasComponent(Collidable)) {
+            entity.addComponent(Collidable)
+        }
+    }
+
+    randomPositionY() {
+        return height - math.random(40, 115) // TODO add max and min to Position component
+    }
+
+    randomSpeedX(velocity) {
+        return math.random(velocity.minX, velocity.maxX)
+    }
+}
+ItemSystem.queries = {
+    entities: {
+        components: [Colletable, Renderable],
+        listen: {
+            removed: true,
+        }
+    },
+}

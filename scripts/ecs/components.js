@@ -1,6 +1,7 @@
 class Renderable extends TagComponent { }
 class Collidable extends TagComponent { }
 class Animable extends TagComponent { }
+class Colletable extends TagComponent { }
 class BackgroundTag extends TagComponent { }
 class PlayerTag extends TagComponent { }
 class EnemyTag extends TagComponent { }
