@@ -6,15 +6,15 @@ class GoblinEnemy extends Enemy {
         this.y = y
         this.width = 16
         this.height = 16
-        this.maxSpeedX = 5
-        this.minSpeedX = 6
+        this.minSpeedX = 5
+        this.maxSpeedX = 6  
         this.updateEntity()
     }
 
     updateEntity() {
-        const scale = 2
+        const scale = 3
         const initialPositionX = this.x || width + this.width
-        const initialPositionY = this.y || height - 54
+        const initialPositionY = this.y || height - 65
 
         this.entity.addComponent(Position, { x: initialPositionX, y: initialPositionY })
             .addComponent(Velocity, { x: 0, y: 0, maxX: this.maxSpeedX, minX: this.minSpeedX })

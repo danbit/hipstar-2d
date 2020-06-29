@@ -1,8 +1,8 @@
 class HeartHud {
-    constructor(imageHeartHud, imageNoHeartHud, imageLostHearts, world) {
+    constructor(imageHeartHud, imageNoHeartHud, imageLostHeart, world) {
         this.imageHeart = imageHeartHud
         this.imageNoHeart = imageNoHeartHud
-        this.imageLostHearts = imageLostHearts
+        this.imageLostHeart = imageLostHeart
         this.scale = 1;
         this.width = 16
         this.height = 16
@@ -18,11 +18,16 @@ class HeartHud {
 
         for (let i = 0; i < healthValue; i++) {
             world.createEntity()
-                .addComponent(HudTag)
+                .addComponent(HealthHudTag)
                 .addComponent(Renderable)
                 .addComponent(Position, { x: initialPositionX, y: initialPositionY })
                 .addComponent(Sprite, {
                     image: this.imageHeart,
+                    imagesAux: {
+                        heart: this.imageHeart,
+                        noHeart: this.imageNoHeart,
+                        lostHeart: this.imageLostHeart
+                    },
                     width: this.width * this.scale,
                     height: this.height * this.scale,
                     imageWidth: this.width,

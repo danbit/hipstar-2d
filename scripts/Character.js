@@ -8,7 +8,7 @@ class Character {
 
     createEntity(world) {
         const initialPositionX = 16
-        const initialPositionY = height - 54
+        const initialPositionY = height - 48
 
         world.createEntity()
             .addComponent(Collidable)

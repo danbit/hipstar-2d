@@ -5,7 +5,7 @@ class Background {
     }
 
     createEntities(world) {
-        let backgroundSpeed = 5
+        let backgroundSpeed = 4
 
         for (let index = 0; index < this.images.length; index++) {
             const image = this.images[index]
