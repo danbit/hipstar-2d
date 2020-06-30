@@ -15,23 +15,29 @@ class GameController {
         this.imageNoHeartHud = loadImage('assets/sprites/hud/no_hearts_hud.png')
         this.imageLostHeartsHud = loadImage('assets/sprites/hud/lost_hearts_anim_strip_5.png')
         this.imageCoinHud = loadImage('assets/sprites/hud/coins_hud.png')
-        // this.imageUIpackSheet = loadImage('assets/sprites/gui/UIpackSheet_transparent.png')
+        this.imageUIpackSheet = loadImage('assets/sprites/gui/UIpackSheet_transparent.png')
 
         this.soundtrack = loadSound('assets/sounds/musics/trilha_jogo.mp3')
         this.soundGameOver = loadSound('assets/sounds/musics/game-over-sound-effect.mp3')
         this.hitEnemySound = loadSound('assets/sounds/effects/hit_enemy.wav')
         this.pickupCoinSound = loadSound('assets/sounds/effects/pickup_coin.wav')
-        this.jumpSound = loadSound('assets/sounds/effects/jump_50.wav')
-        this.jumpSound.setVolume(0.2)
+        this.jumpSound = loadSound('assets/sounds/effects/jump_50.wav')        
+        this.clickSound = loadSound('assets/sounds/effects/click.wav') 
+
+        this.fontPixel = loadFont('assets/fonts/Kenney_Pixel.ttf')   
     }
 
     onStart() {
+        this.jumpSound.setVolume(0.5)
+        this.soundtrack.loop()
+
         // Create world and register the systems on it
         this.world = new World()
             .registerComponent(BackgroundTag)
             .registerComponent(PlayerTag)
             .registerComponent(EnemyTag)
             .registerComponent(HealthHudTag)
+            .registerComponent(UITag)
             .registerComponent(Position)
             .registerComponent(Sprite)
             .registerComponent(Velocity)
@@ -57,7 +63,12 @@ class GameController {
             .registerSystem(ItemSystem)
 
         this.gameEntity = this.world.createEntity()
-            .addComponent(GameState, { isRunning: true })
+            .addComponent(GameState, { 
+                onMenu: true,
+                isRunning: false,
+                gameOver: false,
+                playerIsDead: false
+            })
             .addComponent(Score, { value: 0 })
 
         this.background = new Background([
@@ -68,9 +79,13 @@ class GameController {
             this.imageForestLayer05],
             this.world)
         this.player = new Character(this.imageCharSprite, this.world)
-        this.hearth = new HeartHud(this.imageHeartHud, this.imageNoHeartHud, this.imageLostHeartsHud, this.world)
+        this.mainMenu = new MainMenu(this.imageUIpackSheet, this.world)
+        this.hearth = new HeartHud(
+            this.imageHeartHud,
+            this.imageNoHeartHud,
+            this.imageLostHeartsHud,
+            this.world)
         this.coin =  new Coin(this.imageCoinHud, this.world)   
-        // this.mainMenu =  new MainMenu(this.imageUIpackSheet, this.world)   
 
         const worm = new WormEnemy(this.imageEnemyWorm, this.world)
         const slime = new SlimeEnemy(this.imageEnemySlime, this.world)
@@ -87,8 +102,6 @@ class GameController {
         this.enemies.push(batOrange)
         this.enemies.push(goblin)
         this.enemyController = new EnemyController(this.world, this.enemies)
-
-        this.soundtrack.loop()
     }
 
     onUpdate(delta, time) {
@@ -99,6 +112,7 @@ class GameController {
     onInput(type, key, keyCode) {
         if (type === 'keyPressed') {
             if (this.gameEntity.getComponent(GameState).gameOver) {
+                this.clickSound.play()
                 window.location.reload()
             }
             this.gameEntity.addComponent(PlayerInput, { key, keyCode })

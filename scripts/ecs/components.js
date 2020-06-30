@@ -5,6 +5,7 @@ class Colletable extends TagComponent { }
 class BackgroundTag extends TagComponent { }
 class PlayerTag extends TagComponent { }
 class EnemyTag extends TagComponent { }
+class UITag extends TagComponent { }
 class HealthHudTag extends TagComponent { }
 
 class Position extends Component { }
@@ -65,6 +66,7 @@ Animation.schema = {
 class GameState extends Component { }
 GameState.schema = {
   isRunning: { type: Types.Boolean },
+  onMenu: { type: Types.Boolean },
   gameOver: { type: Types.Boolean },
   playerIsDead: { type: Types.Boolean },
 }

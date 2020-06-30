@@ -13,4 +13,13 @@ It is a project for a free course taught by the company [Alura](https://www.alur
 
 ### Sprites
 
-https://o-lobster.itch.io/platformmetroidvania-pixel-art-asset-pack
+- https://o-lobster.itch.io/platformmetroidvania-pixel-art-asset-pack
+- https://kenney.itch.io/
+
+### Sound Effects
+
+- https://killedbyapixel.github.io/ZzFX/
+
+### Musics
+
+- http://www.freesoundslibrary.com

@@ -1,8 +1,13 @@
 class AnimationSystem extends System {
     execute(_delta, _time) {
         const gameEntity = this.queries.game.results[0]
+        const gameState = gameEntity.getComponent(GameState)
 
         this.queries.entities.results.forEach(entity => {
+            if (!gameState.isRunning && !entity.hasComponent(PlayerTag)) {
+                return
+            }
+
             const sprite = entity.getMutableComponent(Sprite)
             const animation = entity.getMutableComponent(Animation)
             const currentAnimation = animation.animations[animation.current]
@@ -43,6 +48,11 @@ class CollisionSystem extends System {
             return
         }
         const gameEntity = this.queries.game.results[0]
+        const gameState = gameEntity.getComponent(GameState)
+        if (!gameState.isRunning) {
+            return
+        }
+
         const playerEntity = this.queries.player.results[0]
 
         if (!playerEntity.getComponent(PlayerPhysics).collisionEnabled) {
@@ -51,7 +61,7 @@ class CollisionSystem extends System {
 
         this.queries.items.results.forEach(itemEntity => {
             if (this.isColliding(playerEntity, itemEntity)) {
-                game.pickupCoinSound.play()
+                gameController.pickupCoinSound.play()
                 const sprite = itemEntity.getComponent(Sprite)
                 const position = itemEntity.getMutableComponent(Position)
                 position.x = width + sprite.width
@@ -67,7 +77,7 @@ class CollisionSystem extends System {
 
         this.queries.enimies.results.forEach(enemyEntity => {
             if (this.isColliding(playerEntity, enemyEntity)) {
-                game.hitEnemySound.play()
+                gameController.hitEnemySound.play()
                 const health = playerEntity.getMutableComponent(Health)
                 // TODO center all animations on AnimationSystem
                 const animation = playerEntity.getMutableComponent(Animation)
@@ -118,6 +128,12 @@ CollisionSystem.queries = {
 
 class HorizontalMovementSystem extends System {
     execute(_delta, _time) {
+        const gameEntity = this.queries.game.results[0]
+        const gameState = gameEntity.getComponent(GameState)
+        if (!gameState.isRunning) {
+            return
+        }
+
         this.queries.backgrounds.results.forEach(entity => {
             const position = entity.getMutableComponent(Position)
             const velocity = entity.getComponent(Velocity)
@@ -143,6 +159,7 @@ class HorizontalMovementSystem extends System {
     }
 }
 HorizontalMovementSystem.queries = {
+    game: { components: [GameState] },
     entities: { components: [Not(BackgroundTag), Renderable, Position, Velocity] },
     backgrounds: { components: [BackgroundTag, Renderable, Position, Velocity] },
 }
@@ -217,6 +234,12 @@ class PlayerMovementSystem extends System {
     execute(_delta, _time) {
         let hasVerticalInput = false
 
+        const gameEntity = this.queries.game.results[0]
+        this.gameState = gameEntity.getComponent(GameState)
+        if (!this.gameState.isRunning) {
+            return
+        }
+
         this.queries.inputs.results.forEach(entity => {
             const input = entity.getComponent(PlayerInput)
             if (input.keyCode === 38 || input.keyCode === 32) {
@@ -224,9 +247,6 @@ class PlayerMovementSystem extends System {
             }
             entity.removeComponent(PlayerInput, true)
         })
-
-        const gameEntity = this.queries.game.results[0]
-        this.gameState = gameEntity.getComponent(GameState)
 
         const playerEntity = this.queries.player.results[0]
         if (!playerEntity) return
@@ -246,7 +266,7 @@ class PlayerMovementSystem extends System {
 
     jump() {
         if (this.physics.jumpAmount > 0 && !this.gameState.gameOver) {
-            game.jumpSound.play()
+            gameController.jumpSound.play()
             this.animation.current = 'jumpingUp'
             this.physics.jumpSpeed = - this.physics.jumpVariation
             this.physics.jumpAmount--
@@ -316,6 +336,7 @@ class EnemyWaveSystem extends System {
     }
 }
 EnemyWaveSystem.queries = {
+    game: { components: [GameState] },
     entities: {
         components: [EnemyTag, Renderable],
         listen: {
@@ -343,6 +364,36 @@ ScoreSystem.queries = {
 
 class GUISystem extends System {
     execute(_delta, _time) {
+
+        const gameEntity = this.queries.game.results[0]
+        const gameState = gameEntity.getMutableComponent(GameState)
+        if (gameState.onMenu) {
+            this.renderMenuScreen()
+        }
+
+        let removeAllUI = false
+        this.queries.inputs.results.forEach(entity => {
+            const input = entity.getComponent(PlayerInput)
+            if (input.keyCode === 13) {
+                gameController.clickSound.play()
+                clear()
+                removeAllUI = true
+                setTimeout(() => {
+                    gameState.isRunning = true
+                    gameState.onMenu = false
+                }, 500)
+            }
+            entity.removeComponent(PlayerInput, true)
+        })
+
+        this.queries.guis.results.forEach(entity => {
+            if (removeAllUI) {
+                setTimeout(() => {
+                    entity.removeComponent(Renderable)
+                }, 500)
+            }
+        })
+
         this.queries.game.changed.forEach(entity => {
             const gameState = entity.getComponent(GameState)
             if (gameState.gameOver) {
@@ -359,17 +410,36 @@ class GUISystem extends System {
     renderScore(score) {
         textAlign(RIGHT)
         fill('#FFF')
-        textSize(24)
+        textFont(gameController.fontPixel)
+        textSize(30)
         text(parseInt(score.value), width - 10, 30)
+    }
+
+    renderMenuScreen() {
+        textAlign(CENTER)
+        fill('#fff')
+        textFont(gameController.fontPixel)
+        textSize(36)
+        text("Hipstar Runner", width / 2 + 5, height / 2 - 60)
+
+        textAlign(CENTER)
+        fill('#000')
+        textSize(20)
+        text("START", width / 2 + 2, height / 2 - 6)
+
+        textAlign(CENTER)
+        textSize(18)
+        text("Jump = SPACE  or  Arrow UP", width / 2 + 5, height / 2 + 40)
     }
 
     renderGameOverScreen() {
         background('rgba(0%,0%,0%,.80)')
         fill("#cc0000")
-        game.soundtrack.stop() // TODO create sound system
-        game.soundGameOver.play()
+        gameController.soundtrack.stop() // TODO create sound system
+        gameController.soundGameOver.play()
         textAlign(CENTER)
-        textSize(36)
+        textFont(gameController.fontPixel)
+        textSize(64)
         text("Game Over", width / 2, height / 2)
         noLoop()
     }
@@ -381,6 +451,8 @@ GUISystem.queries = {
             changed: [GameState]
         }
     },
+    inputs: { components: [PlayerInput] },
+    guis: { components: [UITag] },
     score: {
         components: [Score, Not(Colletable)],
         listen: {
@@ -427,6 +499,7 @@ class HealthSystem extends System {
     }
 }
 HealthSystem.queries = {
+    game: { components: [GameState] },
     healthHud: {
         components: [HealthHudTag]
     },
@@ -466,6 +539,7 @@ class ItemSystem extends System {
     }
 }
 ItemSystem.queries = {
+    game: { components: [GameState] },
     entities: {
         components: [Colletable, Renderable],
         listen: {
