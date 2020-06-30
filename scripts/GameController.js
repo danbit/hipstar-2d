@@ -15,9 +15,14 @@ class GameController {
         this.imageNoHeartHud = loadImage('assets/sprites/hud/no_hearts_hud.png')
         this.imageLostHeartsHud = loadImage('assets/sprites/hud/lost_hearts_anim_strip_5.png')
         this.imageCoinHud = loadImage('assets/sprites/hud/coins_hud.png')
-        
-        this.soundtrack = loadSound('assets/sounds/trilha_jogo.mp3')
-        this.jumpSound = loadSound('assets/sounds/sound_jump.mp3')
+        // this.imageUIpackSheet = loadImage('assets/sprites/gui/UIpackSheet_transparent.png')
+
+        this.soundtrack = loadSound('assets/sounds/musics/trilha_jogo.mp3')
+        this.soundGameOver = loadSound('assets/sounds/musics/game-over-sound-effect.mp3')
+        this.hitEnemySound = loadSound('assets/sounds/effects/hit_enemy.wav')
+        this.pickupCoinSound = loadSound('assets/sounds/effects/pickup_coin.wav')
+        this.jumpSound = loadSound('assets/sounds/effects/jump_50.wav')
+        this.jumpSound.setVolume(0.2)
     }
 
     onStart() {
@@ -65,6 +70,7 @@ class GameController {
         this.player = new Character(this.imageCharSprite, this.world)
         this.hearth = new HeartHud(this.imageHeartHud, this.imageNoHeartHud, this.imageLostHeartsHud, this.world)
         this.coin =  new Coin(this.imageCoinHud, this.world)   
+        // this.mainMenu =  new MainMenu(this.imageUIpackSheet, this.world)   
 
         const worm = new WormEnemy(this.imageEnemyWorm, this.world)
         const slime = new SlimeEnemy(this.imageEnemySlime, this.world)

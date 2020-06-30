@@ -23,6 +23,7 @@ Sprite.schema = {
   width: { type: Types.Number },
   height: { type: Types.Number },
   frame: { type: Types.Number },
+  frameObj: { type: Types.Object },
   collisionOffset: { type: Types.Number },
   flipImage: { type: Types.Boolean },  
 }

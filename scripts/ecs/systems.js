@@ -14,6 +14,7 @@ class AnimationSystem extends System {
                     sprite.frame = 0
                     animation.cycles = 0
 
+                    // TODO change this actions to a GameState system
                     if (animation.current === 'death') {
                         const gameState = gameEntity.getMutableComponent(GameState)
                         gameState.gameOver = true
@@ -50,6 +51,7 @@ class CollisionSystem extends System {
 
         this.queries.items.results.forEach(itemEntity => {
             if (this.isColliding(playerEntity, itemEntity)) {
+                game.pickupCoinSound.play()
                 const sprite = itemEntity.getComponent(Sprite)
                 const position = itemEntity.getMutableComponent(Position)
                 position.x = width + sprite.width
@@ -65,6 +67,7 @@ class CollisionSystem extends System {
 
         this.queries.enimies.results.forEach(enemyEntity => {
             if (this.isColliding(playerEntity, enemyEntity)) {
+                game.hitEnemySound.play()
                 const health = playerEntity.getMutableComponent(Health)
                 // TODO center all animations on AnimationSystem
                 const animation = playerEntity.getMutableComponent(Animation)
@@ -158,7 +161,17 @@ class SpriteRendererSystem extends System {
 
     render(sprite, position, animation) {
         if (sprite.isSpriteSheet) {
-            const currentAnimation = animation.animations[animation.current]
+            let frameX = 0
+            let frameY = 0
+            if (animation) {
+                const currentAnimation = animation.animations[animation.current]
+                frameX = sprite.frame * sprite.imageWidth
+                frameY = currentAnimation.row * sprite.imageHeight
+            } else {
+                frameX = sprite.frameObj.x
+                frameY = sprite.frameObj.y
+                // console.log('sprite.frameObj', sprite.frameObj)
+            }
             let positionX = position.x
 
             if (sprite.flipImage) {
@@ -172,8 +185,8 @@ class SpriteRendererSystem extends System {
                 position.y,
                 sprite.width,
                 sprite.height,
-                sprite.frame * sprite.imageWidth,
-                currentAnimation.row * sprite.imageHeight,
+                frameX,
+                frameY,
                 sprite.imageWidth,
                 sprite.imageHeight
             )
@@ -354,6 +367,7 @@ class GUISystem extends System {
         background('rgba(0%,0%,0%,.80)')
         fill("#cc0000")
         game.soundtrack.stop() // TODO create sound system
+        game.soundGameOver.play()
         textAlign(CENTER)
         textSize(36)
         text("Game Over", width / 2, height / 2)
