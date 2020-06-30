@@ -4,21 +4,21 @@ window.enableRenderCollider = false
 
 let lastTime;
 let isGameOver
-let game
+let gameController
 
 preload = () => {
-  game = new GameController()
-  game.onCreate()
+  gameController = new GameController()
+  gameController.onCreate()
 }
 
 setup = () => {
   createCanvas(480, 270) // 640, 360
   frameRate(30)
-  game.onStart()
+  gameController.onStart()
 }
 
 keyPressed = () => {
-  game.onInput('keyPressed', key, keyCode)
+  gameController.onInput('keyPressed', key, keyCode)
 }
 
 draw = () => {
@@ -27,5 +27,5 @@ draw = () => {
   lastTime = time;
 
   // Run all the systems
-  game.onUpdate(delta, time)
+  gameController.onUpdate(delta, time)
 }

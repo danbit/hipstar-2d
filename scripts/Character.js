@@ -18,7 +18,7 @@ class Character {
             .addComponent(Health, { value: this.health })
             .addComponent(Position, { x: initialPositionX, y: initialPositionY })
             .addComponent(Animation, {
-                current: "running",
+                current: "idle",
                 animations: {
                     death: {
                         row: 0,
